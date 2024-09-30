@@ -84,7 +84,7 @@ model = gen_ai.GenerativeModel(
 )
 
 # Chat con IngenIAr
-if option == "Chat con IngenIAr":
+if option == "Chat con la IA":
     if "chat_session" not in st.session_state:
         st.session_state.chat_session = model.start_chat(history=[])
 
