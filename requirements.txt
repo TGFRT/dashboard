@@ -3,3 +3,4 @@ google-generativeai
 streamlit==1.30.0
 Pillow
 requests
+PyPDF2
