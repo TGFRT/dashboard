@@ -136,21 +136,22 @@ elif option == "Creador de Contenido":
     option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas"))
 
 # Barra de progreso al cambiar de opción
-    with st.spinner("Cargando..."):
+  # Barra de progreso al cambiar de opción
+with st.spinner("Cargando..."):
     time.sleep(1)
 
-     if option == "Generar Ideas de Negocio":
-     st.header("Cuéntanos sobre ti")
+    if option == "Generar Ideas de Negocio":
+        st.header("Cuéntanos sobre ti")
+        # Cajas de texto para ingresar información del usuario
+        intereses = st.text_area("¿Cuáles son tus intereses o pasiones?")
+        experiencia = st.text_area("¿Cuál es tu experiencia laboral o académica?")
+        conocimientos = st.text_area("¿En qué áreas tienes conocimientos o habilidades?")
+        mercado = st.text_area("¿Qué tipo de mercado te interesa?")
+        problemas = st.text_area("¿Qué problemas o necesidades quieres resolver?")
+        
+        # Botón para iniciar la generación de ideas
+        if st.button("Generar Ideas"):
 
-      # Cajas de texto para ingresar información del usuario
-      intereses = st.text_area("¿Cuáles son tus intereses o pasiones?")
-      experiencia = st.text_area("¿Cuál es tu experiencia laboral o académica?")
-      conocimientos = st.text_area("¿En qué áreas tienes conocimientos o habilidades?")
-      mercado = st.text_area("¿Qué tipo de mercado te interesa?")
-      problemas = st.text_area("¿Qué problemas o necesidades quieres resolver?")
-
-    # Botón para iniciar la generación de ideas
-       if st.button("Generar Ideas"):
          if not (intereses and experiencia and conocimientos and mercado and problemas):
              st.error("Por favor, completa todos los campos antes de generar ideas.")
          else:
