@@ -38,8 +38,6 @@ if "current_api_index" not in st.session_state:
     st.session_state.current_api_index = 0
 if "daily_request_count" not in st.session_state:
     st.session_state.daily_request_count = 0
-if "message_count" not in st.session_state:
-    st.session_state.message_count = 0
 if "last_reset_datetime" not in st.session_state:
     st.session_state.last_reset_datetime = datetime.now()  # Guarda la fecha y hora del último reinicio
 if "last_user_messages" not in st.session_state:
@@ -66,7 +64,7 @@ def check_reset():
     try:
         # Compara la fecha del último reinicio con la fecha actual
         if datetime.now().date() > st.session_state.last_reset_datetime.date():
-            st.session_state.message_count = 0  # Reinicia el contador de mensajes
+            st.session_state.daily_request_count = 0  # Reinicia el contador de mensajes
             st.session_state.last_reset_datetime = datetime.now()  # Actualiza la fecha
     except Exception as e:
         st.error(f"Ocurrió un error al verificar el reinicio: {str(e)}")
@@ -98,15 +96,15 @@ if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
 
 # Título del dashboard
-st.title("🤖 IngenIAr - Dashboard")
+st.title("🤖 IngenIAr ")
 
 # Barra lateral para navegación
-st.sidebar.header("Navegación")
-page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Modelos de Negocio"])
+st.sidebar.header("PANEL")
+page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Planifica tu negocio"])
 
 # Sección de Chat
 if page == "Chat":
-    st.header("💬 Chat con IngenIAr")
+    st.header("")
 
     # Mostrar el historial de chat
     for message in st.session_state.chat_session.history:
@@ -120,50 +118,39 @@ if page == "Chat":
         # Normaliza el texto del mensaje del usuario
         normalized_user_input = normalize_text(user_input.strip())
 
-        # Verificar si se ha alcanzado el límite de mensajes
-        check_reset()  # Verifica si se debe reiniciar el contador
-        if st.session_state.message_count >= 20:
-            st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana para enviar más.")
+        # Agrega el mensaje del usuario al chat y muéstralo
+        st.chat_message("user").markdown(user_input)
+
+        # Verificar si el mensaje es repetitivo
+        is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
+        if is_similar:
+            st.warning("Por favor, no envíes mensajes repetitivos.")
         else:
-            # Agrega el mensaje del usuario al chat y muéstralo
-            st.chat_message("user").markdown(user_input)
+            # Agrega el nuevo mensaje a la lista de mensajes anteriores
+            st.session_state.last_user_messages.append(normalized_user_input)
+            if len(st.session_state.last_user_messages) > 10:  # Ajusta el número según tus necesidades
+                st.session_state.last_user_messages.pop(0)
 
-            # Verificar si el mensaje es repetitivo
-            is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
-            if is_similar:
-                st.warning("Por favor, no envíes mensajes repetitivos.")
-            else:
-                # Agrega el nuevo mensaje a la lista de mensajes anteriores
-                st.session_state.last_user_messages.append(normalized_user_input)
-                if len(st.session_state.last_user_messages) > 10:  # Ajusta el número según tus necesidades
-                    st.session_state.last_user_messages.pop(0)
+            # Envía el mensaje del usuario a Gemini y obtiene la respuesta
+            try:
+                check_and_rotate_api()  # Verifica si se debe rotar la clave API
+                gemini_response = st.session_state.chat_session.send_message(user_input.strip())
+                
+                # Muestra la respuesta de Gemini
+                with st.chat_message("assistant"):
+                    st.markdown(gemini_response.text)
 
-                # Envía el mensaje del usuario a Gemini y obtiene la respuesta
-                try:
-                    check_and_rotate_api()  # Verifica si se debe rotar la clave API
-                    gemini_response = st.session_state.chat_session.send_message(user_input.strip())
-                    
-                    # Muestra la respuesta de Gemini
-                    with st.chat_message("assistant"):
-                        st.markdown(gemini_response.text)
+                # Incrementa el contador de solicitudes
+                st.session_state.daily_request_count += 1
 
-                    # Incrementa el contador de solicitudes
-                    st.session_state.daily_request_count += 1
-                    st.session_state.message_count += 1  # Incrementa el contador de mensajes enviados
-
-                except Exception as e:
-                    # Mensaje de error general
-                    st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
-
-    # Muestra el contador de mensajes restantes
-    remaining_messages = 20 - st.session_state.message_count
-    st.write(f"Mensajes restantes: {remaining_messages}")
+            except Exception as e:
+                # Mensaje de error general
+                st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
 
     # Botón para borrar la conversación
     if st.button("Borrar Conversación", key="delete_conversation"):
         st.session_state.chat_session = model.start_chat(history=[])
         st.session_state.last_user_messages.clear()
-        st.session_state.message_count = 0
         st.session_state.daily_request_count = 0
         st.success("Conversación borrada.")
 
@@ -198,4 +185,3 @@ elif page == "Modelos de Negocio":
                 st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
         else:
             st.warning("Por favor, ingresa una idea de negocio antes de generar el modelo.")
-
