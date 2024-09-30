@@ -315,6 +315,5 @@ elif option == "Marketing y ventas":
     # Si solo quieres mostrar el contenido del archivo directamente:
     with open("marketingyventas.py", "r") as file:
         contenido = file.read()
-    
-    # Muestra el contenido del archivo en un bloque de código
-    st.code(contenido, language='python')
+    # Ejecuta el código del archivo
+    exec(contenido)
