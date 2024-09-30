@@ -100,98 +100,101 @@ if "chat_session" not in st.session_state:
 # Título del dashboard
 st.title("🤖 IngenIAr - Dashboard")
 
+# Barra lateral para navegación
+st.sidebar.header("Navegación")
+page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Modelos de Negocio"])
+
 # Sección de Chat
-st.header("💬 Chat con IngenIAr")
+if page == "Chat":
+    st.header("💬 Chat con IngenIAr")
 
-# Mostrar el historial de chat
-for message in st.session_state.chat_session.history:
-    role = "assistant" if message.role == "model" else "user"
-    with st.chat_message(role):
-        st.markdown(message.parts[0].text)
+    # Mostrar el historial de chat
+    for message in st.session_state.chat_session.history:
+        role = "assistant" if message.role == "model" else "user"
+        with st.chat_message(role):
+            st.markdown(message.parts[0].text)
 
-# Botón para borrar la conversación
-if st.button("Borrar Conversación"):
-    st.session_state.chat_session = model.start_chat(history=[])
-    st.session_state.last_user_messages.clear()
-    st.session_state.message_count = 0
-    st.session_state.daily_request_count = 0
-    st.success("Conversación borrada.")
+    # Botón para borrar la conversación
+    if st.button("Borrar Conversación"):
+        st.session_state.chat_session = model.start_chat(history=[])
+        st.session_state.last_user_messages.clear()
+        st.session_state.message_count = 0
+        st.session_state.daily_request_count = 0
+        st.success("Conversación borrada.")
 
-# Campo de entrada para el mensaje del usuario
-user_input = st.chat_input("Pregunta a IngenIAr...")
-if user_input:
-    # Normaliza el texto del mensaje del usuario
-    normalized_user_input = normalize_text(user_input.strip())
+    # Campo de entrada para el mensaje del usuario
+    user_input = st.chat_input("Pregunta a IngenIAr...")
+    if user_input:
+        # Normaliza el texto del mensaje del usuario
+        normalized_user_input = normalize_text(user_input.strip())
 
-    # Verificar si se ha alcanzado el límite de mensajes
-    check_reset()  # Verifica si se debe reiniciar el contador
-    if st.session_state.message_count >= 20:
-        st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana para enviar más.")
-    else:
-        # Agrega el mensaje del usuario al chat y muéstralo
-        st.chat_message("user").markdown(user_input)
-
-        # Verificar si el mensaje es repetitivo
-        is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
-        if is_similar:
-            st.warning("Por favor, no envíes mensajes repetitivos.")
+        # Verificar si se ha alcanzado el límite de mensajes
+        check_reset()  # Verifica si se debe reiniciar el contador
+        if st.session_state.message_count >= 20:
+            st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana para enviar más.")
         else:
-            # Agrega el nuevo mensaje a la lista de mensajes anteriores
-            st.session_state.last_user_messages.append(normalized_user_input)
-            if len(st.session_state.last_user_messages) > 10:  # Ajusta el número según tus necesidades
-                st.session_state.last_user_messages.pop(0)
+            # Agrega el mensaje del usuario al chat y muéstralo
+            st.chat_message("user").markdown(user_input)
 
-            # Envía el mensaje del usuario a Gemini y obtiene la respuesta
-            try:
-                check_and_rotate_api()  # Verifica si se debe rotar la clave API
-                gemini_response = st.session_state.chat_session.send_message(user_input.strip())
-                
-                # Muestra la respuesta de Gemini
-                with st.chat_message("assistant"):
-                    st.markdown(gemini_response.text)
+            # Verificar si el mensaje es repetitivo
+            is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
+            if is_similar:
+                st.warning("Por favor, no envíes mensajes repetitivos.")
+            else:
+                # Agrega el nuevo mensaje a la lista de mensajes anteriores
+                st.session_state.last_user_messages.append(normalized_user_input)
+                if len(st.session_state.last_user_messages) > 10:  # Ajusta el número según tus necesidades
+                    st.session_state.last_user_messages.pop(0)
 
-                # Incrementa el contador de solicitudes
-                st.session_state.daily_request_count += 1
-                st.session_state.message_count += 1  # Incrementa el contador de mensajes enviados
+                # Envía el mensaje del usuario a Gemini y obtiene la respuesta
+                try:
+                    check_and_rotate_api()  # Verifica si se debe rotar la clave API
+                    gemini_response = st.session_state.chat_session.send_message(user_input.strip())
+                    
+                    # Muestra la respuesta de Gemini
+                    with st.chat_message("assistant"):
+                        st.markdown(gemini_response.text)
 
-            except Exception as e:
-                # Mensaje de error general
-                st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
+                    # Incrementa el contador de solicitudes
+                    st.session_state.daily_request_count += 1
+                    st.session_state.message_count += 1  # Incrementa el contador de mensajes enviados
 
-# Muestra el contador de mensajes restantes
-remaining_messages = 20 - st.session_state.message_count
-st.write(f"Mensajes restantes: {remaining_messages}")
+                except Exception as e:
+                    # Mensaje de error general
+                    st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
+
+    # Muestra el contador de mensajes restantes
+    remaining_messages = 20 - st.session_state.message_count
+    st.write(f"Mensajes restantes: {remaining_messages}")
 
 # Sección para el Creador de Modelos de Negocio
-st.header("💼 Creador de Modelos de Negocio")
+elif page == "Modelos de Negocio":
+    st.header("💼 Creador de Modelos de Negocio")
 
-# Aquí puedes colocar tu otro código para la funcionalidad del creador de modelos de negocio.
-# Por ejemplo, podrías implementar un campo de entrada y un botón para generar el modelo de negocio.
+    # Campo de entrada para la idea de negocio
+    business_idea = st.text_input("Ingresa una idea de negocio:")
+    if st.button("Generar Modelo de Negocio"):
+        if business_idea:
+            # Normaliza la idea
+            normalized_business_idea = normalize_text(business_idea)
 
-# Campo de entrada para la idea de negocio
-business_idea = st.text_input("Ingresa una idea de negocio:")
-if st.button("Generar Modelo de Negocio"):
-    if business_idea:
-        # Normaliza la idea
-        normalized_business_idea = normalize_text(business_idea)
-
-        # Aquí debes implementar la lógica para generar el modelo de negocio usando tu API.
-        # Puedes usar la función de la API aquí para obtener el modelo y mostrarlo.
-        
-        # Ejemplo de llamada a la API (ajusta según tu lógica)
-        try:
-            check_and_rotate_api()  # Verifica si se debe rotar la clave API
-            model_response = gen_ai.GenerativeModel(
-                model_name="gemini-1.5-flash",
-                generation_config=generation_config,
-                system_instruction=f"Genera un modelo de negocio para la siguiente idea: {normalized_business_idea}"
-            ).generate()
+            # Aquí debes implementar la lógica para generar el modelo de negocio usando tu API.
+            # Puedes usar la función de la API aquí para obtener el modelo y mostrarlo.
             
-            # Muestra la respuesta del modelo de negocio
-            st.success("Modelo de negocio generado:")
-            st.markdown(model_response.text)
-            
-        except Exception as e:
-            st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
-    else:
-        st.warning("Por favor, ingresa una idea de negocio antes de generar el modelo.")
+            # Ejemplo de llamada a la API (ajusta según tu lógica)
+            try:
+                check_and_rotate_api()  # Verifica si se debe rotar la clave API
+                model_response = gen_ai.GenerativeModel(
+                    model_name="gemini-1.5-flash",
+                    generation_config=generation_config,
+                    system_instruction=f"Genera un modelo de negocio para la siguiente idea: {normalized_business_idea}"
+                ).generate()
+                
+                # Muestra la respuesta del modelo de negocio
+                st.success("Modelo de negocio generado:")
+                st.markdown(model_response.text)
+                
+            except Exception as e:
+                st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
+        else:
+            st.warning("Por favor, ingresa una idea de negocio antes de generar el modelo.")
