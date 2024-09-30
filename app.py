@@ -87,9 +87,9 @@ if st.session_state.chat_session is None:
 
 # CSS personalizado para estilizar los botones y la barra lateral
 st.markdown(
-    """
+    f"""
     <style>
-    .stButton button {
+    .stButton button {{
         width: 100%;  /* Hace los botones del mismo ancho que la barra lateral */
         background-color: #ff7f50;  /* Color naranja */
         color: white;  /* Color del texto */
@@ -97,25 +97,42 @@ st.markdown(
         padding: 10px 0px;  /* Aumenta el tamaño del botón */
         margin: 5px 0px;  /* Margen entre los botones */
         font-size: 16px;  /* Aumenta el tamaño del texto */
-    }
-    .stButton button:hover {
+    }}
+
+    .stButton button:hover {{
         background-color: #ff5733;  /* Un color más oscuro al pasar el mouse */
-    }
+    }}
+
+    /* Cambiar color del botón seleccionado */
+    .stButton.selected button {{
+        background-color: #ff5733;  /* Un color más oscuro para el botón seleccionado */
+        color: black;  /* Cambia el texto a negro */
+    }}
     </style>
     """,
     unsafe_allow_html=True
 )
 
+# Función para crear un botón estilizado
+def sidebar_button(label, option):
+    # Verifica si la opción actual es la seleccionada
+    if st.session_state.active_option == option:
+        btn_class = "selected"
+    else:
+        btn_class = ""
+
+    # Aplica la clase CSS según si está seleccionada o no
+    clicked = st.sidebar.markdown(f'<div class="stButton {btn_class}">{st.sidebar.button(label)}</div>', unsafe_allow_html=True)
+    if clicked:
+        st.session_state.active_option = option
+
 # Menú de botones en la barra lateral
 st.sidebar.title("IngenIAr Dashboard")
 st.sidebar.markdown("### Navega por las opciones:")
 
-# Botones para la navegación
-if st.sidebar.button("Chat"):
-    st.session_state.active_option = "Chat"
-
-if st.sidebar.button("Otra Opción"):
-    st.session_state.active_option = "Otra Opción"
+# Botones estilizados
+sidebar_button("Chat", "Chat")
+sidebar_button("Otra Opción", "Otra Opción")
 
 # Mostrar la interfaz del chat si se selecciona "Chat"
 if st.session_state.active_option == "Chat":
