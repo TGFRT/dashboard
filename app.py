@@ -33,8 +33,8 @@ st.set_page_config(
 # Selección de la funcionalidad
 option = st.sidebar.selectbox("Elige una opción:", 
                                ("Chat con IngenIAr", 
-                                "Creador de Contenido", 
-                                "Creador de Campañas de Marketing"))
+                                "Planifica tu negocio", 
+                                "Marketing y ventas"))
 
 # API keys y configuración
 API_KEYS = [st.secrets["GOOGLE_API_KEY_1"],
@@ -124,7 +124,7 @@ if option == "Chat con IngenIAr":
                     st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
 
 # Creador de Contenido
-elif option == "Creador de Contenido":
+elif option == "Planifica tu negocio":
     st.title("CREA Y PLANIFICA CON INGENIAR 💡")
     option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas"))
 
