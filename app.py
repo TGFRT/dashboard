@@ -85,6 +85,27 @@ if st.session_state.chat_session is None:
     except Exception as e:
         st.error(f"Error al iniciar la sesión de chat: {str(e)}")
 
+# CSS personalizado para estilizar los botones y la barra lateral
+st.markdown(
+    """
+    <style>
+    .stButton button {
+        width: 100%;  /* Hace los botones del mismo ancho que la barra lateral */
+        background-color: #ff7f50;  /* Color naranja */
+        color: white;  /* Color del texto */
+        border-radius: 8px;  /* Bordes redondeados */
+        padding: 10px 0px;  /* Aumenta el tamaño del botón */
+        margin: 5px 0px;  /* Margen entre los botones */
+        font-size: 16px;  /* Aumenta el tamaño del texto */
+    }
+    .stButton button:hover {
+        background-color: #ff5733;  /* Un color más oscuro al pasar el mouse */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Menú de botones en la barra lateral
 st.sidebar.title("IngenIAr Dashboard")
 st.sidebar.markdown("### Navega por las opciones:")
@@ -136,4 +157,3 @@ if st.session_state.active_option == "Chat":
 if st.session_state.active_option == "Otra Opción":
     st.subheader("Esta es otra opción.")
     st.write("Aquí puedes agregar más funcionalidades o información relacionada.")
-
