@@ -155,8 +155,8 @@ if page == "Chat":
         st.success("Conversación borrada.")
 
 # Sección para el Creador de Modelos de Negocio
-elif page == "Modelos de Negocio":
-    st.header("💼 Creador de Modelos de Negocio")
+elif page == "Planifica tu negocio":
+    st.header("💼  ")
 
     # Campo de entrada para la idea de negocio
     business_idea = st.text_input("Ingresa una idea de negocio:")
