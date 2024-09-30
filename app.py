@@ -96,12 +96,10 @@ model = gen_ai.GenerativeModel(
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
 
-# Título del dashboard
-st.title("🤖 IngenIAr ")
 
 # Barra lateral para navegación
-st.sidebar.header("PANEL")
-page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Crea y Planifica con IngenIAr"])
+st.sidebar.header("INGENIAR PANEL")
+page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Crea y Planifica tu negocior"])
 
 # Sección de Chat
 if page == "Chat":
