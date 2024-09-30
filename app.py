@@ -1,9 +1,16 @@
+import os
+import time
 import streamlit as st
 import google.generativeai as gen_ai
-import time
-import PyPDF2
+from datetime import datetime
 from difflib import SequenceMatcher
 import re
+import requests
+import io
+from PIL import Image
+import random
+from googletrans import Translator
+import PyPDF2
 
 # Función para calcular la similitud entre dos textos
 def similar(a, b):
@@ -23,11 +30,53 @@ st.set_page_config(
     layout="centered",
 )
 
-# Inicializa la clave API
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-gen_ai.configure(api_key=GOOGLE_API_KEY)
+# Lista de claves API
+API_KEYS = [
+    st.secrets["GOOGLE_API_KEY_1"],
+    st.secrets["GOOGLE_API_KEY_2"],
+    st.secrets["GOOGLE_API_KEY_3"],
+    st.secrets["GOOGLE_API_KEY_4"],
+    st.secrets["GOOGLE_API_KEY_5"],
+]
 
-# Configuración de generación
+# Inicializa variables de estado
+if "current_api_index" not in st.session_state:
+    st.session_state.current_api_index = 0
+if "daily_request_count" not in st.session_state:
+    st.session_state.daily_request_count = 0
+if "message_count" not in st.session_state:
+    st.session_state.message_count = 0
+if "last_reset_datetime" not in st.session_state:
+    st.session_state.last_reset_datetime = datetime.now()
+if "last_user_messages" not in st.session_state:
+    st.session_state.last_user_messages = []
+
+# Configura la API con la clave actual
+def configure_api():
+    gen_ai.configure(api_key=API_KEYS[st.session_state.current_api_index])
+
+# Rotar la clave API si alcanzas el límite diario
+def rotate_api():
+    st.session_state.current_api_index = (st.session_state.current_api_index + 1) % len(API_KEYS)
+    st.session_state.daily_request_count = 0
+    configure_api()
+
+# Verificar y rotar si se alcanza el límite diario
+def check_and_rotate_api():
+    if st.session_state.daily_request_count >= 1500:
+        st.warning(f"Clave API {API_KEYS[st.session_state.current_api_index]} alcanzó el límite diario. Rotando...")
+        rotate_api()
+
+# Verifica si se debe reiniciar el contador de mensajes
+def check_reset():
+    if datetime.now().date() > st.session_state.last_reset_datetime.date():
+        st.session_state.message_count = 0
+        st.session_state.last_reset_datetime = datetime.now()
+
+# Configura la API al inicio
+configure_api()
+
+# Crea el modelo con instrucciones de sistema
 generation_config = {
     "temperature": 1,
     "top_p": 0.95,
@@ -35,192 +84,162 @@ generation_config = {
     "max_output_tokens": 8192,
 }
 
-# Barra lateral para navegación
-st.sidebar.header("INGENIAR PANEL")
-page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Crea y Planifica tu Negocio"])
+model = gen_ai.GenerativeModel(
+    model_name="gemini-1.5-flash",
+    generation_config=generation_config,
+    system_instruction="Eres un asistente de IngenIAr, una empresa de soluciones tecnológicas con IA."
+)
 
-# Función para el chat
-def chat():
-    st.header("Chat con IngenIAr")
+# Inicializa la sesión de chat si no está presente
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
 
-    # Inicializa la sesión de chat si no está presente
-    if "chat_session" not in st.session_state:
-        model = gen_ai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config=generation_config,
-            system_instruction="Eres un asistente de IngenIAr, una empresa de soluciones tecnológicas con IA."
-        )
-        st.session_state.chat_session = model.start_chat(history=[])
+# Título del chatbot
+st.title("🤖 IngenIAr - Chat")
 
-    # Mostrar el historial de chat
-    for message in st.session_state.chat_session.history:
-        role = "assistant" if message.role == "model" else "user"
-        with st.chat_message(role):
-            st.markdown(message.parts[0].text)
+# Mostrar el historial de chat
+for message in st.session_state.chat_session.history:
+    role = "assistant" if message.role == "model" else "user"
+    with st.chat_message(role):
+        st.markdown(message.parts[0].text)
 
-    # Campo de entrada para el mensaje del usuario
-    user_input = st.chat_input("Pregunta a IngenIAr...")
-    if user_input:
-        normalized_user_input = normalize_text(user_input.strip())
+# Botón para borrar la conversación
+if st.button("Borrar Conversación"):
+    st.session_state.chat_session = model.start_chat(history=[])
+    st.session_state.last_user_messages.clear()
+    st.session_state.message_count = 0
+    st.session_state.daily_request_count = 0
+    st.success("Conversación borrada.")
+
+# Campo de entrada para el mensaje del usuario
+user_input = st.chat_input("Pregunta a IngenIAr...")
+if user_input:
+    normalized_user_input = normalize_text(user_input.strip())
+
+    check_reset()  # Verifica si se debe reiniciar el contador
+    if st.session_state.message_count >= 20:
+        st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana para enviar más.")
+    else:
         st.chat_message("user").markdown(user_input)
 
-        try:
-            gemini_response = st.session_state.chat_session.send_message(user_input.strip())
-            with st.chat_message("assistant"):
-                st.markdown(gemini_response.text)
-        except Exception as e:
-            st.error("Error: " + str(e))
+        is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
+        if is_similar:
+            st.warning("Por favor, no envíes mensajes repetitivos.")
+        else:
+            st.session_state.last_user_messages.append(normalized_user_input)
+            if len(st.session_state.last_user_messages) > 10:
+                st.session_state.last_user_messages.pop(0)
 
-# Función para crear y planificar negocios
-def crear_y_planificar():
-    st.header("CREA Y PLANIFICA CON INGENIAR 💡")
-    option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas"))
-
-    if option == "Generar Ideas de Negocio":
-        st.header("Cuéntanos sobre ti")
-        intereses = st.text_area("¿Cuáles son tus intereses o pasiones?")
-        experiencia = st.text_area("¿Cuál es tu experiencia laboral o académica?")
-        conocimientos = st.text_area("¿En qué áreas tienes conocimientos o habilidades?")
-        mercado = st.text_area("¿Qué tipo de mercado te interesa?")
-        problemas = st.text_area("¿Qué problemas o necesidades quieres resolver?")
-
-        if st.button("Generar Ideas"):
-            if not (intereses and experiencia and conocimientos and mercado and problemas):
-                st.error("Por favor, completa todos los campos antes de generar ideas.")
-            else:
-                prompt = f"""
-                Genera 5 ideas de negocio innovadoras para una persona con las siguientes características:
-                - Intereses: {intereses}
-                - Experiencia: {experiencia}
-                - Conocimientos: {conocimientos}
-                - Mercado: {mercado}
-                - Problemas a resolver: {problemas}
+            try:
+                check_and_rotate_api()
+                gemini_response = st.session_state.chat_session.send_message(user_input.strip())
                 
-                Incluye una breve descripción de cada idea y su potencial mercado.
-                """
-                try:
-                    model = gen_ai.GenerativeModel(
-                        model_name="gemini-1.5-flash",
-                        generation_config=generation_config,
-                        system_instruction="Eres un generador de ideas de negocio innovadoras."
-                    )
-                    chat_session = model.start_chat(history=[])
-                    gemini_response = chat_session.send_message(prompt)
-                    st.markdown(f"## Ideas de negocio:\n{gemini_response.text}")
-                except Exception as e:
-                    st.error(f"Ocurrió un error al generar las ideas: {str(e)}")
+                with st.chat_message("assistant"):
+                    st.markdown(gemini_response.text)
 
-    elif option == "Generar Modelo de Negocio":
-        st.header("Proporcione su idea de negocio")
-        idea_negocio = st.text_area("Describe tu idea de negocio")
+                st.session_state.daily_request_count += 1
+                st.session_state.message_count += 1
 
-        if st.button("Generar Modelo de Negocio"):
-            prompt = f"""
-            Crea un modelo de negocio Canvas basado en la siguiente idea:
-            Idea de negocio: {idea_negocio}
-            Incluye los siguientes componentes:
-            - Propuesta de valor
-            - Segmentos de clientes
-            - Fuentes de ingresos
-            - Actividades clave
-            - Recursos clave
-            - Canales
-            
-            Además, proporciona sugerencias de estrategias para mejorar cada área.
-            """
+            except Exception as e:
+                st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
+
+# Muestra el contador de mensajes restantes
+remaining_messages = 20 - st.session_state.message_count
+st.write(f"Mensajes restantes: {remaining_messages}")
+
+# Funcionalidad para crear y planificar negocios
+st.sidebar.header("Funciones Adicionales")
+page = st.sidebar.selectbox("Selecciona una opción:", ["Creador de Marketing", "Crea y Planifica tu Negocio"])
+
+if page == "Creador de Marketing":
+    st.header("Creador de Marketing 🚀")
+
+    tema = st.text_area("Introduce el tema del contenido que deseas generar:")
+    tipo_contenido = st.selectbox("Selecciona el tipo de contenido:", ["Artículo", "Publicación para Redes Sociales", "Boletín", "Anuncio"])
+
+    imagen_opcion = st.radio("¿Quieres generar una imagen o subir una existente?", ("Generar Imagen", "Subir Imagen"))
+
+    uploaded_image = None
+    if imagen_opcion == "Subir Imagen":
+        uploaded_image = st.file_uploader("Sube una imagen (formato: .jpg, .png)", type=["jpg", "png"])
+
+    if st.button("Generar Contenido"):
+        if not tema:
+            st.error("Por favor, ingresa un tema para generar contenido.")
+        else:
+            prompt = f"Genera un {tipo_contenido.lower()} sobre el siguiente tema: Tema: {tema}"
+
             try:
                 model = gen_ai.GenerativeModel(
                     model_name="gemini-1.5-flash",
                     generation_config=generation_config,
-                    system_instruction="Eres un asistente para crear modelos de negocio Canvas."
+                    system_instruction="Eres un generador de contenido de marketing."
                 )
+
                 chat_session = model.start_chat(history=[])
+
+                progress = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.05)  # Simulación de tiempo de espera
+                    progress.progress(i + 1)
+
                 gemini_response = chat_session.send_message(prompt)
-                st.markdown(f"## Modelo de Negocio Canvas Generado:\n{gemini_response.text}")
+
+                st.markdown(f"### Contenido Generado:\n")
+                st.text_area("Texto generado:", value=gemini_response.text, height=200, key="generated_content", disabled=False)
+
+                if imagen_opcion == "Generar Imagen":
+                    translator = Translator()
+                    translated_prompt = translator.translate(tema, src='es', dest='en').text
+                    prompt_suffix = f" with vibrant colors {random.randint(1, 1000)}"
+                    final_prompt = translated_prompt + prompt_suffix
+
+                    with st.spinner("Generando imagen..."):
+                        image_response = query({"inputs": final_prompt})
+
+                    if image_response.status_code != 200:
+                        st.error("Hubo un problema al generar la imagen. Intenta de nuevo más tarde.")
+                    else:
+                        st.session_state.image = Image.open(io.BytesIO(image_response.content))
+                        st.image(st.session_state.image, caption="Imagen Generada", use_column_width=True)
+
+                elif uploaded_image is not None:
+                    st.image(uploaded_image, caption="Imagen Subida", use_column_width=True)
+                else:
+                    st.success("No se generó ninguna imagen y no se subió ninguna.")
+
             except Exception as e:
-                st.error(f"Error al generar el modelo de negocio: {str(e)}")
+                st.error(f"Ocurrió un error al generar el contenido: {str(e)}")
 
-    elif option == "Planificador Financiero":
-        st.header("Planificador Financiero")
-        ingresos_fijos = st.number_input("Ingresos fijos proyectados:", min_value=0.0, step=100.0)
-        ingresos_variables = st.number_input("Ingresos variables proyectados:", min_value=0.0, step=100.0)
-        costos_fijos = st.number_input("Costos fijos proyectados:", min_value=0.0, step=100.0)
-        costos_variables = st.number_input("Costos variables proyectados:", min_value=0.0, step=100.0)
-        moneda = st.selectbox("Selecciona la moneda:", ["Dólares (USD)", "Soles (PEN)", "Euros (EUR)"])
-        descripcion_negocio = st.text_area("Describe tu negocio y su estructura:")
-        uploaded_file = st.file_uploader("Sube un archivo PDF con información adicional", type="pdf")
+elif page == "Crea y Planifica tu Negocio":
+    st.header("Crea y Planifica tu Negocio 💡")
 
-        if st.button("Generar Plan Financiero"):
-            if ingresos_fijos < 0 or ingresos_variables < 0 or costos_fijos < 0 or costos_variables < 0:
-                st.error("Por favor, ingresa valores válidos para ingresos y costos.")
-            else:
-                pdf_content = ""
-                if uploaded_file is not None:
-                    pdf_reader = PyPDF2.PdfReader(uploaded_file)
-                    for page in pdf_reader.pages:
-                        pdf_content += page.extract_text() + "\n"
+    objetivos = st.text_area("Introduce los objetivos de tu negocio:")
+    plan = st.text_area("¿Qué plan tienes en mente para lograr tus objetivos?")
 
-                total_ingresos = ingresos_fijos + ingresos_variables
-                total_costos = costos_fijos + costos_variables
-                rentabilidad = total_ingresos - total_costos
+    if st.button("Generar Plan de Negocios"):
+        if not objetivos or not plan:
+            st.error("Por favor, completa todos los campos antes de generar el plan.")
+        else:
+            prompt = f"Crea un plan de negocios basado en los siguientes objetivos y planes: Objetivos: {objetivos}, Plan: {plan}"
 
-                prompt = f"""
-                Genera un plan financiero realista para un negocio con los siguientes datos:
-                - Ingresos fijos proyectados: {ingresos_fijos} {moneda}
-                - Ingresos variables proyectados: {ingresos_variables} {moneda}
-                - Costos fijos proyectados: {costos_fijos} {moneda}
-                - Costos variables proyectados: {costos_variables} {moneda}
-                - Rentabilidad proyectada: {rentabilidad} {moneda}
-                - Descripción del negocio: {descripcion_negocio}
-                - Información adicional del PDF: {pdf_content}
-                
-                Proporciona un análisis de la rentabilidad y sugerencias para optimizar los costos.
-                """
+            try:
+                model = gen_ai.GenerativeModel(
+                    model_name="gemini-1.5-flash",
+                    generation_config=generation_config,
+                    system_instruction="Eres un creador de planes de negocios."
+                )
 
-                try:
-                    model = gen_ai.GenerativeModel(
-                        model_name="gemini-1.5-flash",
-                        generation_config=generation_config,
-                        system_instruction="Eres un planificador financiero. Proporciona un análisis realista basado en los datos proporcionados."
-                    )
-                    chat_session = model.start_chat(history=[])
-                    gemini_response = chat_session.send_message(prompt)
-                    st.markdown(f"## Plan Financiero Generado:\n{gemini_response.text}")
-                except Exception as e:
-                    st.error(f"Error al generar el plan financiero: {str(e)}")
+                chat_session = model.start_chat(history=[])
 
-    elif option == "Validador de Ideas":
-        st.header("Validador de Ideas de Negocio")
-        idea_negocio = st.text_area("Describe tu idea de negocio")
+                progress = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.05)
+                    progress.progress(i + 1)
 
-        if st.button("Validar Idea"):
-            if not idea_negocio:
-                st.error("Por favor, ingresa una descripción de tu idea de negocio.")
-            else:
-                prompt = f"""
-                Evalúa la viabilidad de la siguiente idea de negocio:
-                Idea de negocio: {idea_negocio}
-                
-                Proporciona comentarios sobre:
-                - Oportunidades de mercado
-                - Potenciales desafíos
-                - Sugerencias para mejorar la idea
-                """
+                business_plan_response = chat_session.send_message(prompt)
+                st.markdown(f"### Plan de Negocios Generado:\n")
+                st.text_area("Plan generado:", value=business_plan_response.text, height=300, key="generated_business_plan", disabled=False)
 
-                try:
-                    model = gen_ai.GenerativeModel(
-                        model_name="gemini-1.5-flash",
-                        generation_config=generation_config,
-                        system_instruction="Eres un validador de ideas de negocio. Proporciona comentarios sobre la viabilidad de la idea presentada."
-                    )
-                    chat_session = model.start_chat(history=[])
-                    gemini_response = chat_session.send_message(prompt)
-                    st.markdown(f"## Comentarios sobre la Idea:\n{gemini_response.text}")
-                except Exception as e:
-                    st.error(f"Ocurrió un error al validar la idea: {str(e)}")
-
-# Renderiza el contenido basado en la opción seleccionada
-if page == "Chat":
-    chat()
-else:
-    crear_y_planificar()
+            except Exception as e:
+                st.error(f"Ocurrió un error al generar el plan de negocios: {str(e)}")
