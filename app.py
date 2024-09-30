@@ -309,4 +309,12 @@ elif option == "Planifica tu negocio":
 
 # Creador de Campañas de Marketing
 elif option == "Marketing y ventas":
-# Selección de la funcionalidad
+    st.title("Marketing y Ventas")
+
+    # Aquí, podrías tener una función en mi_archivo.py que quieras llamar
+    # Si solo quieres mostrar el contenido del archivo directamente:
+    with open("marketingyventas.py", "r") as file:
+        contenido = file.read()
+    
+    # Muestra el contenido del archivo en un bloque de código
+    st.code(contenido, language='python')
