@@ -114,14 +114,6 @@ if page == "Chat":
         with st.chat_message(role):
             st.markdown(message.parts[0].text)
 
-    # Botón para borrar la conversación
-    if st.button("Borrar Conversación"):
-        st.session_state.chat_session = model.start_chat(history=[])
-        st.session_state.last_user_messages.clear()
-        st.session_state.message_count = 0
-        st.session_state.daily_request_count = 0
-        st.success("Conversación borrada.")
-
     # Campo de entrada para el mensaje del usuario
     user_input = st.chat_input("Pregunta a IngenIAr...")
     if user_input:
@@ -167,6 +159,14 @@ if page == "Chat":
     remaining_messages = 20 - st.session_state.message_count
     st.write(f"Mensajes restantes: {remaining_messages}")
 
+    # Botón para borrar la conversación
+    if st.button("Borrar Conversación", key="delete_conversation"):
+        st.session_state.chat_session = model.start_chat(history=[])
+        st.session_state.last_user_messages.clear()
+        st.session_state.message_count = 0
+        st.session_state.daily_request_count = 0
+        st.success("Conversación borrada.")
+
 # Sección para el Creador de Modelos de Negocio
 elif page == "Modelos de Negocio":
     st.header("💼 Creador de Modelos de Negocio")
@@ -198,3 +198,4 @@ elif page == "Modelos de Negocio":
                 st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
         else:
             st.warning("Por favor, ingresa una idea de negocio antes de generar el modelo.")
+
