@@ -41,7 +41,8 @@ st.set_page_config(
 option = st.sidebar.selectbox("Elige una opción:", 
                                ("Chat con la IA", 
                                 "Planifica tu negocio", 
-                                "Marketing y ventas"))
+                                "Marketing y ventas",
+                               "Operaciones y eficiencia"))
 
 # API keys y configuración
 API_KEYS = [st.secrets["GOOGLE_API_KEY_1"],
