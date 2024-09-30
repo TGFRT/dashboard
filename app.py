@@ -309,7 +309,6 @@ elif option == "Planifica tu negocio":
 
 # Creador de Campañas de Marketing
 elif option == "Marketing y ventas":
-    st.set_page_config(page_title="CREADOR DE MARKETING CON INGENIAR", page_icon=":rocket:", layout="centered")
 
     option = st.selectbox("Elige una opción:", ("Creador de Contenido", "Analizador de Audiencia", "Creador de Campañas de Marketing"))
 
