@@ -464,19 +464,8 @@ elif option == "Operaciones y Eficiencia":
 
     # Selección de opción dentro de Operaciones y Eficiencia
     sub_option = st.selectbox("Elige una opción:", 
-                               ("Asistente de Tareas", 
-                                "Automatización de Procesos", 
+                               ("Automatización de Procesos", 
                                 "Análisis de Datos"))
-
-    if sub_option == "Asistente de Tareas":
-        st.header("Asistente de Tareas")
-        tareas = st.text_area("Introduce tus tareas y plazos (formato: Tarea - Fecha):")
-        if st.button("Organizar Tareas"):
-            if tareas:
-                # Aquí iría la lógica de organización y priorización
-                st.success("Tus tareas han sido organizadas. (Funcionalidad en desarrollo)")
-            else:
-                st.error("Por favor, introduce tus tareas.")
 
     elif sub_option == "Automatización de Procesos":
         st.header("Automatización de Procesos")
