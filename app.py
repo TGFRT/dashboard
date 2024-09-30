@@ -308,7 +308,7 @@ elif option == "Planifica tu negocio":
                 st.error(f"Ocurrió un error al validar la idea: {str(e)}")
 
 # Creador de Campañas de Marketing
-elif option == "Creador de Contenido":
+elif option == "Marketing y ventas":
     st.header("Creador de Contenido")
 
     tema = st.text_area("Introduce el tema del contenido que deseas generar:")
