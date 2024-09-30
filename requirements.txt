@@ -2,3 +2,4 @@ streamlit
 google-generative-ai
 Pillow
 requests
+python
