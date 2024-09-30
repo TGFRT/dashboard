@@ -466,8 +466,7 @@ elif option == "Operaciones y Eficiencia":
     sub_option = st.selectbox("Elige una opción:", 
                                ("Automatización de Procesos", 
                                 "Análisis de Datos"))
-
-    elif sub_option == "Automatización de Procesos":
+      if sub_option == "Automatización de Procesos":
         st.header("Automatización de Procesos")
         st.write("Esta sección te permitirá crear flujos de trabajo automatizados para trabajos repetitivos. (Funcionalidad en desarrollo)")
 
