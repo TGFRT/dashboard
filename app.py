@@ -460,8 +460,6 @@ elif option == "Marketing y ventas":
                 except Exception as e:
                     st.error(f"Ocurrió un error al generar la estrategia: {str(e)}")
 elif option == "Operaciones y Eficiencia":
-    # Operaciones y Eficiencia
-elif option == "Operaciones y Eficiencia":
     st.title("Operaciones y Eficiencia")
 
     # Selección de opción dentro de Operaciones y Eficiencia
