@@ -17,7 +17,7 @@ def normalize_text(text):
     return text
 
 # Configura Streamlit
-st.set_page_config(page_title="Chat con IngenIAr!", page_icon=":brain:", layout="centered")
+st.set_page_config(page_title="IngenIAr Dashboard", page_icon=":brain:", layout="centered")
 
 # Lista de claves API
 API_KEYS = [
@@ -39,10 +39,18 @@ if "waiting" not in st.session_state:
     st.session_state.waiting = False
 if "last_user_messages" not in st.session_state:
     st.session_state.last_user_messages = []
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = None
 
 # Configura la API con la clave actual
 def configure_api():
     gen_ai.configure(api_key=API_KEYS[st.session_state.current_api_index])
+
+# Rotar la clave API si alcanzas el límite diario
+def rotate_api():
+    st.session_state.current_api_index = (st.session_state.current_api_index + 1) % len(API_KEYS)
+    st.session_state.daily_request_count = 0  # Reinicia el conteo de solicitudes diarias
+    configure_api()
 
 # Verificar y rotar si se alcanza el límite diario
 def check_and_rotate_api():
@@ -69,39 +77,47 @@ except Exception as e:
     st.error(f"Error al inicializar el modelo: {str(e)}")
 
 # Inicializa la sesión de chat
-if "chat_session" not in st.session_state:
+if st.session_state.chat_session is None:
     try:
         st.session_state.chat_session = model.start_chat(history=[])
     except Exception as e:
         st.error(f"Error al iniciar la sesión de chat: {str(e)}")
 
-# Título del chatbot
-st.title("🤖 IngenIAr - Chat")
+# Menú de selección en el dashboard
+option = st.sidebar.selectbox("Selecciona una opción", ["Chat", "Otra Opción"])
 
-# Mostrar el historial de chat solo si chat_session y history existen
-if "chat_session" in st.session_state and hasattr(st.session_state.chat_session, "history"):
-    for message in st.session_state.chat_session.history:
-        role = "assistant" if message.role == "model" else "user"
-        with st.chat_message(role):
-            st.markdown(message.parts[0].text)
+# Si elige "Chat", muestra la interfaz del chat
+if option == "Chat":
+    st.title("🤖 IngenIAr - Chat")
 
-# Campo de entrada para el mensaje del usuario
-user_prompt = st.chat_input("Pregunta a IngenIAr...")
-if user_prompt:
-    st.chat_message("user").markdown(user_prompt)
-    normalized_user_prompt = normalize_text(user_prompt.strip())
-    st.session_state.last_user_messages.append(normalized_user_prompt)
+    # Mostrar el historial de chat solo si chat_session y history existen
+    if st.session_state.chat_session and hasattr(st.session_state.chat_session, "history"):
+        for message in st.session_state.chat_session.history:
+            role = "assistant" if message.role == "model" else "user"
+            with st.chat_message(role):
+                st.markdown(message.parts[0].text)
 
-    # Envía el mensaje del usuario a Gemini
-    try:
-        check_and_rotate_api()  # Verifica si se debe rotar la clave API
-        gemini_response = st.session_state.chat_session.send_message(user_prompt.strip())
-        with st.chat_message("assistant"):
-            st.markdown(gemini_response.text)
+    # Campo de entrada para el mensaje del usuario
+    user_prompt = st.chat_input("Pregunta a IngenIAr...")
+    if user_prompt:
+        st.chat_message("user").markdown(user_prompt)
+        normalized_user_prompt = normalize_text(user_prompt.strip())
+        st.session_state.last_user_messages.append(normalized_user_prompt)
 
-        st.session_state.daily_request_count += 1
-        st.session_state.message_count += 1
+        # Verificar si el mensaje es repetitivo
+        is_similar = any(similar(normalized_user_prompt, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
+        if is_similar:
+            st.warning("Por favor, no envíes mensajes repetitivos.")
+        else:
+            # Envía el mensaje del usuario a Gemini
+            try:
+                check_and_rotate_api()  # Verifica si se debe rotar la clave API
+                gemini_response = st.session_state.chat_session.send_message(user_prompt.strip())
+                with st.chat_message("assistant"):
+                    st.markdown(gemini_response.text)
 
-    except Exception as e:
-        st.error("Hay muchas personas usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
+                st.session_state.daily_request_count += 1
+                st.session_state.message_count += 1
 
+            except Exception as e:
+                st.error("Hay muchas personas usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
