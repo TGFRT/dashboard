@@ -1,8 +1,4 @@
-Claro, te proporcionaré el código completo del dashboard actualizado con todas las nuevas funcionalidades integradas.
 
-
-
-```python
 import os
 import time
 import streamlit as st
