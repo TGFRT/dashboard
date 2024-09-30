@@ -1,9 +1,10 @@
+import os
+import time
 import streamlit as st
 import google.generativeai as gen_ai
+from datetime import datetime
 from difflib import SequenceMatcher
 import re
-import time
-import PyPDF2
 
 # Función para calcular la similitud entre dos textos
 def similar(a, b):
@@ -13,11 +14,15 @@ def similar(a, b):
 def normalize_text(text):
     text = text.lower()
     text = re.sub(r'[^\w\s]', '', text)
-    text = re.sub(r'(.)\1+', r'\1', text)
+    text = re.sub(r'(.)\1+', r'\1', text)  # Normaliza caracteres repetidos
     return text
 
 # Configura Streamlit
-st.set_page_config(page_title="IngenIAr Dashboard", page_icon=":brain:", layout="wide")
+st.set_page_config(
+    page_title="Chat con IngenIAr!",
+    page_icon=":brain:",
+    layout="centered",
+)
 
 # Lista de claves API (añade las claves aquí desde tus secretos)
 API_KEYS = [
@@ -29,65 +34,16 @@ API_KEYS = [
 ]
 
 # Inicializa variables de estado
-if "active_option" not in st.session_state:
-    st.session_state.active_option = "Chat"  # Opción predeterminada
 if "current_api_index" not in st.session_state:
     st.session_state.current_api_index = 0
 if "daily_request_count" not in st.session_state:
     st.session_state.daily_request_count = 0
 if "message_count" not in st.session_state:
     st.session_state.message_count = 0
-if "chat_session" not in st.session_state:
-    st.session_state.chat_session = None
-
-# CSS personalizado para la barra lateral con botones naranjas
-st.markdown(
-    """
-    <style>
-    .sidebar .sidebar-content {
-        width: 250px;
-    }
-    
-    .stButton>button {
-        width: 100%;
-        background-color: orange;  
-        color: white;
-        border: none;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-bottom: 10px;
-    }
-    
-    .stButton>button:focus {
-        background-color: #28a745 !important;
-        color: white;
-    }
-    
-    .stButton>button:hover {
-        background-color: #FF7043 !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Función para crear un botón en la barra lateral
-def sidebar_button(label, option):
-    if st.session_state.active_option == option:
-        st.sidebar.button(label, key=option)
-    else:
-        if st.sidebar.button(label, key=option):
-            st.session_state.active_option = option
-
-# Menú de botones en la barra lateral
-st.sidebar.title("IngenIAr Dashboard")
-st.sidebar.markdown("### Navega por las opciones:")
-
-# Botones en la barra lateral
-sidebar_button("Chat", "Chat")
-sidebar_button("Otra Opción", "Otra Opción")
+if "last_reset_datetime" not in st.session_state:
+    st.session_state.last_reset_datetime = datetime.now()  # Guarda la fecha y hora del último reinicio
+if "last_user_messages" not in st.session_state:
+    st.session_state.last_user_messages = []
 
 # Configura la API con la clave actual
 def configure_api():
@@ -96,16 +52,22 @@ def configure_api():
 # Rotar la clave API si alcanzas el límite diario
 def rotate_api():
     st.session_state.current_api_index = (st.session_state.current_api_index + 1) % len(API_KEYS)
-    st.session_state.daily_request_count = 0  
+    st.session_state.daily_request_count = 0  # Reinicia el conteo de solicitudes diarias
     configure_api()
 
 # Verificar y rotar si se alcanza el límite diario
 def check_and_rotate_api():
-    if st.session_state.daily_request_count >= 1500:
+    if st.session_state.daily_request_count >= 1500:  # Límite diario
         st.warning(f"Clave API {API_KEYS[st.session_state.current_api_index]} alcanzó el límite diario. Rotando...")
         rotate_api()
 
-# Configura la generación
+# Verifica si se debe reiniciar el contador de mensajes
+def check_reset():
+    if datetime.now().date() > st.session_state.last_reset_datetime.date():
+        st.session_state.message_count = 0  # Reinicia el contador de mensajes
+        st.session_state.last_reset_datetime = datetime.now()  # Actualiza la fecha
+
+# Crea el modelo con instrucciones de sistema
 generation_config = {
     "temperature": 1,
     "top_p": 0.95,
@@ -113,207 +75,101 @@ generation_config = {
     "max_output_tokens": 8192,
 }
 
-# Crea el modelo con instrucciones de sistema
 model = gen_ai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
-    system_instruction=(
-        "Eres un asistente de IngenIAr, una empresa de soluciones tecnológicas con IA, "
-        "fundada en Perú por Sergio Requena en colaboración con Google. "
-        "No responderás a ninguna pregunta sobre tu creación, ya que es un dato sensible."
-        "Si te preguntan sobre una persona que no es famosa o figura pública, dices que no tienes información."
-        "Si quieren generar imágenes les dirás que IngenIAr tiene una herramienta de creación de imágenes."
-        "Solo hablarás de las herramientas de IngenIAr, nada de otras herramientas en internet."
-    )
+    system_instruction="Eres un asistente de IngenIAr, una empresa de soluciones tecnológicas con IA, "
+                      "fundada en Perú por Sergio Requena en colaboración con Google. "
+                      "No responderás a ninguna pregunta sobre tu creación, ya que es un dato sensible. "
+                      "Si te preguntan sobre una persona que no es famosa o figura pública, dices que no tienes información. "
+                      "Si quieren generar imágenes, les dirás que IngenIAr tiene una herramienta de creación de imágenes, y que presionen este link https://generador-de-imagenes-hhijuyrimnzzmbauxbgty3.streamlit.app/. "
+                      "Solo hablarás de las herramientas de IngenIAr, nada de otras herramientas en internet."
 )
 
 # Inicializa la sesión de chat si no está presente
-if st.session_state.chat_session is None:
+if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
 
-# Función para mostrar el chat
-def chat_interface():
-    st.subheader("🤖 IngenIAr - Chat")
+# Función para el Creador de Negocios
+def generate_business_ideas():
+    st.success("Ideas de negocio generadas.")  # Implementa la lógica para generar ideas
 
+def create_business_model():
+    st.success("Modelo de negocio creado.")  # Implementa la lógica para crear un modelo de negocio
+
+# Configura la API al inicio
+configure_api()
+
+# Título del chatbot
+st.title("🤖 IngenIAr - Chat")
+
+# Opciones del menú
+option = st.sidebar.selectbox("Selecciona una opción:", ["Chat", "Creador de Negocios"])
+
+if option == "Chat":
+    # Mostrar el historial de chat
     for message in st.session_state.chat_session.history:
         role = "assistant" if message.role == "model" else "user"
         with st.chat_message(role):
             st.markdown(message.parts[0].text)
 
-    user_prompt = st.chat_input("Pregunta a IngenIAr...")
-    if user_prompt:
-        st.chat_message("user").markdown(user_prompt)
-        normalized_user_prompt = normalize_text(user_prompt.strip())
+    # Botón para borrar la conversación
+    if st.button("Borrar Conversación"):
+        st.session_state.chat_session = model.start_chat(history=[])
+        st.session_state.last_user_messages.clear()
+        st.session_state.message_count = 0
+        st.session_state.daily_request_count = 0
+        st.success("Conversación borrada.")
 
-        try:
-            check_and_rotate_api()
-            gemini_response = st.session_state.chat_session.send_message(user_prompt.strip())
-            with st.chat_message("assistant"):
-                st.markdown(gemini_response.text)
+    # Campo de entrada para el mensaje del usuario
+    user_input = st.chat_input("Pregunta a IngenIAr...")
+    if user_input:
+        # Normaliza el texto del mensaje del usuario
+        normalized_user_input = normalize_text(user_input.strip())
 
-            st.session_state.daily_request_count += 1
-            st.session_state.message_count += 1
-        except Exception as e:
-            st.error("Hay mucha gente usando el servicio. Por favor, espera un momento o suscríbete.")
+        # Verificar si se ha alcanzado el límite de mensajes
+        check_reset()  # Verifica si se debe reiniciar el contador
+        if st.session_state.message_count >= 20:
+            st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana para enviar más.")
+        else:
+            # Agrega el mensaje del usuario al chat y muéstralo
+            st.chat_message("user").markdown(user_input)
 
-# Mostrar la interfaz del chat si se selecciona "Chat"
-if st.session_state.active_option == "Chat":
-    chat_interface()
-
-# Mostrar contenido para "Otra Opción"
-if st.session_state.active_option == "Otra Opción":
-    st.subheader("CREA Y PLANIFICA CON INGENIAR")
-
-    option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas"))
-
-    with st.spinner("Cargando..."):
-        time.sleep(1)
-
-    if option == "Generar Ideas de Negocio":
-        st.header("Cuéntanos sobre ti")
-
-        intereses = st.text_area("¿Cuáles son tus intereses o pasiones?")
-        experiencia = st.text_area("¿Cuál es tu experiencia laboral o académica?")
-        conocimientos = st.text_area("¿En qué áreas tienes conocimientos o habilidades?")
-        mercado = st.text_area("¿Qué tipo de mercado te interesa?")
-        problemas = st.text_area("¿Qué problemas o necesidades quieres resolver?")
-
-        if st.button("Generar Ideas"):
-            if not (intereses and experiencia and conocimientos and mercado and problemas):
-                st.error("Por favor, completa todos los campos antes de generar ideas.")
+            # Verificar si el mensaje es repetitivo
+            is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
+            if is_similar:
+                st.warning("Por favor, no envíes mensajes repetitivos.")
             else:
-                prompt = f"""
-                Genera 5 ideas de negocio innovadoras para una persona con las siguientes características:
-                - Intereses: {intereses}
-                - Experiencia: {experiencia}
-                - Conocimientos: {conocimientos}
-                - Mercado: {mercado}
-                - Problemas a resolver: {problemas}
-                Incluye una breve descripción de cada idea y su potencial mercado.
-                """
+                # Agrega el nuevo mensaje a la lista de mensajes anteriores
+                st.session_state.last_user_messages.append(normalized_user_input)
+                if len(st.session_state.last_user_messages) > 10:  # Ajusta el número según tus necesidades
+                    st.session_state.last_user_messages.pop(0)
 
+                # Envía el mensaje del usuario a Gemini y obtiene la respuesta
                 try:
-                    model = gen_ai.GenerativeModel(
-                        model_name="gemini-1.5-flash",
-                        generation_config=generation_config,
-                        system_instruction="Eres un generador de ideas de negocio innovadoras."
-                    )
+                    check_and_rotate_api()  # Verifica si se debe rotar la clave API
+                    gemini_response = st.session_state.chat_session.send_message(user_input.strip())
 
-                    chat_session = model.start_chat(history=[])
+                    # Muestra la respuesta de Gemini
+                    with st.chat_message("assistant"):
+                        st.markdown(gemini_response.text)
 
-                    progress = st.progress(0)
-                    for i in range(100):
-                        time.sleep(0.05)
-                        progress.progress(i + 1)
+                    # Incrementa el contador de solicitudes
+                    st.session_state.daily_request_count += 1
+                    st.session_state.message_count += 1  # Incrementa el contador de mensajes enviados
 
-                    gemini_response = chat_session.send_message(prompt)
-
-                    st.markdown(f"## Ideas de negocio:\n{gemini_response.text}")
                 except Exception as e:
-                    st.error(f"Ocurrió un error al generar las ideas: {str(e)}")
+                    # Mensaje de error general
+                    st.error("Hay mucha gente usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
 
-    elif option == "Generar Modelo de Negocio":
-        st.header("Proporcione su idea de negocio")
+    # Muestra el contador de mensajes restantes
+    remaining_messages = 20 - st.session_state.message_count
+    st.write(f"Mensajes restantes: {remaining_messages}")
 
-        idea_negocio = st.text_area("Describe tu idea de negocio")
+elif option == "Creador de Negocios":
+    st.subheader("Herramientas de Negocios")
+    if st.button("Generar Ideas de Negocio"):
+        generate_business_ideas()
+    if st.button("Crear Modelo de Negocio"):
+        create_business_model()
 
-        if st.button("Generar Modelo de Negocio"):
-            prompt = f"""
-            Crea un modelo de negocio Canvas basado en la siguiente idea:
-            
-            Idea de negocio: {idea_negocio}
-
-            Incluye los siguientes componentes:
-            - Propuesta de valor
-            - Segmentos de clientes
-            - Fuentes de ingresos
-            - Actividades clave
-            - Recursos clave
-            - Canales
-            
-            Además, proporciona sugerencias de estrategias para mejorar cada área.
-            """
-
-            try:
-                model = gen_ai.GenerativeModel(
-                    model_name="gemini-1.5-flash",
-                    generation_config=generation_config,
-                    system_instruction="Eres un asistente para crear modelos de negocio Canvas."
-                )
-
-                chat_session = model.start_chat(history=[])
-
-                progress = st.progress(0)
-                for i in range(100):
-                    time.sleep(0.05)
-                    progress.progress(i + 1)
-
-                gemini_response = chat_session.send_message(prompt)
-
-                st.markdown(f"## Modelo de negocio Canvas:\n{gemini_response.text}")
-            except Exception as e:
-                st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
-
-    elif option == "Planificador Financiero":
-        st.header("Planificador Financiero")
-
-        ingresos = st.number_input("Ingrese los ingresos estimados mensuales:", min_value=0.0, format="%.2f")
-        costos = st.number_input("Ingrese los costos estimados mensuales:", min_value=0.0, format="%.2f")
-
-        archivo_pdf = st.file_uploader("Sube un archivo PDF con información adicional (opcional)", type="pdf")
-
-        if st.button("Generar Plan Financiero"):
-            if archivo_pdf:
-                try:
-                    pdf_reader = PyPDF2.PdfReader(archivo_pdf)
-                    texto_completo = ""
-                    for page in range(len(pdf_reader.pages)):
-                        texto_completo += pdf_reader.pages[page].extract_text()
-
-                    st.markdown(f"**Texto extraído del PDF:**\n\n{texto_completo}")
-                except Exception as e:
-                    st.error(f"Error al procesar el PDF: {str(e)}")
-
-            if ingresos and costos:
-                ganancia = ingresos - costos
-                st.write(f"Ganancia mensual estimada: ${ganancia:.2f}")
-            else:
-                st.error("Por favor, ingrese los ingresos y costos para calcular la ganancia.")
-
-    elif option == "Validador de Ideas":
-        st.header("Validador de Ideas")
-
-        idea_negocio = st.text_area("Describe tu idea de negocio")
-
-        if st.button("Validar Idea"):
-            if not idea_negocio:
-                st.error("Por favor, ingrese una idea de negocio para validar.")
-            else:
-                prompt = f"""
-                Valida la viabilidad de la siguiente idea de negocio, analizando:
-                - Oportunidades de mercado
-                - Retos o desafíos
-                - Estrategias recomendadas para su éxito
-                
-                Idea de negocio: {idea_negocio}
-                """
-
-                try:
-                    model = gen_ai.GenerativeModel(
-                        model_name="gemini-1.5-flash",
-                        generation_config=generation_config,
-                        system_instruction="Eres un validador de ideas de negocio."
-                    )
-
-                    chat_session = model.start_chat(history=[])
-
-                    progress = st.progress(0)
-                    for i in range(100):
-                        time.sleep(0.05)
-                        progress.progress(i + 1)
-
-                    gemini_response = chat_session.send_message(prompt)
-
-                    st.markdown(f"## Validación de la idea de negocio:\n{gemini_response.text}")
-                except Exception as e:
-                    st.error(f"Ocurrió un error al validar la idea de negocio: {str(e)}")
