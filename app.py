@@ -141,7 +141,7 @@ if option == "Chat con la IA":
 # Creador de Contenido
 elif option == "Planifica tu negocio":
     st.title("CREA Y PLANIFICA CON INGENIAR 💡")
-    option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas"))
+    option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas","Operaciones y eficiencia"))
 
     with st.spinner("Cargando..."):
         time.sleep(1)
@@ -458,3 +458,31 @@ elif option == "Marketing y ventas":
 
                 except Exception as e:
                     st.error(f"Ocurrió un error al generar la estrategia: {str(e)}")
+elif option == "Operaciones y Eficiencia":
+    st.title("Operaciones y Eficiencia")
+
+    # Sección de Asistente de Tareas
+    st.header("Asistente de Tareas")
+    tareas = st.text_area("Introduce tus tareas y plazos (formato: Tarea - Fecha):")
+    if st.button("Organizar Tareas"):
+        if tareas:
+            # Aquí iría la lógica de organización y priorización
+            st.success("Tus tareas han sido organizadas. (Funcionalidad en desarrollo)")
+        else:
+            st.error("Por favor, introduce tus tareas.")
+
+    # Sección de Automatización de Procesos
+    st.header("Automatización de Procesos")
+    st.write("Esta sección te permitirá crear flujos de trabajo automatizados para trabajos repetitivos. (Funcionalidad en desarrollo)")
+
+    # Sección de Análisis de Datos
+    st.header("Análisis de Datos")
+    datos_negocio = st.text_area("Introduce los datos de tu negocio:")
+    if st.button("Analizar Datos"):
+        if datos_negocio:
+            # Aquí iría la lógica de análisis de datos
+            st.success("Análisis en proceso... (Funcionalidad en desarrollo)")
+        else:
+            st.error("Por favor, introduce los datos de tu negocio.")
+
+# Aquí puedes continuar con el resto de las funcionalidades o configuraciones...
