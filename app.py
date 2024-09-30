@@ -17,7 +17,7 @@ def normalize_text(text):
     return text
 
 # Configura Streamlit
-st.set_page_config(page_title="IngenIAr Dashboard", page_icon=":brain:", layout="centered")
+st.set_page_config(page_title="IngenIAr Dashboard", page_icon=":brain:", layout="wide")
 
 # Lista de claves API
 API_KEYS = [
@@ -83,18 +83,15 @@ if st.session_state.chat_session is None:
     except Exception as e:
         st.error(f"Error al iniciar la sesión de chat: {str(e)}")
 
-# Menú de selección en el dashboard usando botones
-st.title("IngenIAr Dashboard")
-st.markdown("### Elige una opción:")
+# Menú de navegación en la parte izquierda
+st.sidebar.title("IngenIAr Dashboard")
+st.sidebar.markdown("### Navega por las opciones:")
 
-if st.button("Chat"):
-    st.session_state.selected_option = "Chat"
-
-if st.button("Otra Opción"):
-    st.session_state.selected_option = "Otra Opción"
+# Opciones del menú
+option = st.sidebar.radio("Selecciona una opción:", ("Chat", "Otra Opción"))
 
 # Si elige "Chat", muestra la interfaz del chat
-if st.session_state.get("selected_option") == "Chat":
+if option == "Chat":
     st.subheader("🤖 IngenIAr - Chat")
 
     # Mostrar el historial de chat solo si chat_session y history existen
@@ -130,6 +127,6 @@ if st.session_state.get("selected_option") == "Chat":
                 st.error("Hay muchas personas usando esto. Por favor, espera un momento o suscríbete a un plan de pago.")
 
 # Puedes agregar aquí más lógica para la "Otra Opción"
-if st.session_state.get("selected_option") == "Otra Opción":
+if option == "Otra Opción":
     st.subheader("Esta es otra opción.")
     st.write("Aquí puedes agregar más funcionalidades o información relacionada.")
