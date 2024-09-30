@@ -105,7 +105,7 @@ if option == "Chat con IngenIAr":
         st.success("Conversación borrada.")
 
     user_input = st.chat_input("Pregunta a IngenIAr...")
-    if user_input:
+   if user_input:
     normalized_user_input = normalize_text(user_input.strip())
 
     if st.session_state.message_count >= 20:
@@ -134,6 +134,7 @@ if option == "Chat con IngenIAr":
                 st.session_state.current_api_index = (st.session_state.current_api_index + 1) % len(API_KEYS)
                 configure_api()  # Configura la API con la nueva clave
                 st.error("Hay mucha gente usando esto. Cambiando a otra clave de API. Por favor, espera un momento.")
+
 
 
 # Creador de Contenido
