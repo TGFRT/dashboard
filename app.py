@@ -309,11 +309,6 @@ elif option == "Planifica tu negocio":
 
 # Creador de Campañas de Marketing
 elif option == "Marketing y ventas":
-    def query(payload):
-    API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
-    headers = {"Authorization": "Bearer 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"}
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return response
 
 # Título de la web
 st.title("CREADOR DE MARKETING CON INGENIAR 🚀")
