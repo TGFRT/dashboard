@@ -12,14 +12,12 @@ from PIL import Image
 import random
 from googletrans import Translator
 
-#define la funcion imagenes creator
+# Define la función imágenes creator
 def query(payload):
     API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
     headers = {"Authorization": "Bearer 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"}
     response = requests.post(API_URL, headers=headers, json=payload)
     return response
-
-# Añade esta función justo antes de que comience tu código principal de Streamlit, o donde mejor se ajuste en tu estructura.
 
 # Función para calcular la similitud entre dos textos
 def similar(a, b):
@@ -105,35 +103,38 @@ if option == "Chat con IngenIAr":
         st.success("Conversación borrada.")
 
     user_input = st.chat_input("Pregunta a IngenIAr...")
-   if user_input:
-    normalized_user_input = normalize_text(user_input.strip())
+    
+    if user_input:  # Corregido: la indentación aquí estaba mal
+        normalized_user_input = normalize_text(user_input.strip())
 
-    if st.session_state.message_count >= 20:
-        st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana.")
-    else:
-        st.chat_message("user").markdown(user_input)
-
-        is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
-        if is_similar:
-            st.warning("Por favor, no envíes mensajes repetitivos.")
+        if st.session_state.message_count >= 20:
+            st.warning("Has alcanzado el límite de 20 mensajes. Por favor, espera hasta mañana.")
         else:
-            st.session_state.last_user_messages.append(normalized_user_input)
-            if len(st.session_state.last_user_messages) > 10:
-                st.session_state.last_user_messages.pop(0)
+            st.chat_message("user").markdown(user_input)
 
-            try:
-                gemini_response = st.session_state.chat_session.send_message(user_input.strip())
-                with st.chat_message("assistant"):
-                    st.markdown(gemini_response.text)
+            is_similar = any(similar(normalized_user_input, normalize_text(previous)) > 0.90 for previous in st.session_state.last_user_messages)
+            if is_similar:
+                st.warning("Por favor, no envíes mensajes repetitivos.")
+            else:
+                st.session_state.last_user_messages.append(normalized_user_input)
+                if len(st.session_state.last_user_messages) > 10:
+                    st.session_state.last_user_messages.pop(0)
 
-                st.session_state.daily_request_count += 1
-                st.session_state.message_count += 1
+                try:
+                    gemini_response = st.session_state.chat_session.send_message(user_input.strip())
+                    with st.chat_message("assistant"):
+                        st.markdown(gemini_response.text)
 
-            except Exception as e:
-                # Rotar la clave de API
-                st.session_state.current_api_index = (st.session_state.current_api_index + 1) % len(API_KEYS)
-                configure_api()  # Configura la API con la nueva clave
-                st.error("Hay mucha gente usando esto. Cambiando a otra clave de API. Por favor, espera un momento.")
+                    st.session_state.daily_request_count += 1
+                    st.session_state.message_count += 1
+
+                except Exception as e:
+                    # Rotar la clave de API
+                    st.session_state.current_api_index = (st.session_state.current_api_index + 1) % len(API_KEYS)
+                    configure_api()  # Configura la API con la nueva clave
+                    st.error("Hay mucha gente usando esto. Cambiando a otra clave de API. Por favor, espera un momento.")
+
+# Aquí continua el resto de tu código para las otras funcionalidades...
 
 
 
