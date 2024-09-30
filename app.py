@@ -58,27 +58,32 @@ generation_config = {
     "max_output_tokens": 8192,
 }
 
-model = gen_ai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    generation_config=generation_config,
-    system_instruction="Eres un asistente de IngenIAr, una empresa de soluciones tecnológicas..."
-)
+# Asegúrate de que el modelo esté inicializado
+try:
+    model = gen_ai.GenerativeModel(
+        model_name="gemini-1.5-flash",
+        generation_config=generation_config,
+        system_instruction="Eres un asistente de IngenIAr, una empresa de soluciones tecnológicas..."
+    )
+except Exception as e:
+    st.error(f"Error al inicializar el modelo: {str(e)}")
 
 # Inicializa la sesión de chat
-try:
-    if "chat_session" not in st.session_state:
+if "chat_session" not in st.session_state:
+    try:
         st.session_state.chat_session = model.start_chat(history=[])
-except Exception as e:
-    st.error(f"Error al iniciar la sesión de chat: {str(e)}")
+    except Exception as e:
+        st.error(f"Error al iniciar la sesión de chat: {str(e)}")
 
 # Título del chatbot
 st.title("🤖 IngenIAr - Chat")
 
-# Mostrar el historial de chat
-for message in st.session_state.chat_session.history:
-    role = "assistant" if message.role == "model" else "user"
-    with st.chat_message(role):
-        st.markdown(message.parts[0].text)
+# Mostrar el historial de chat solo si chat_session y history existen
+if "chat_session" in st.session_state and hasattr(st.session_state.chat_session, "history"):
+    for message in st.session_state.chat_session.history:
+        role = "assistant" if message.role == "model" else "user"
+        with st.chat_message(role):
+            st.markdown(message.parts[0].text)
 
 # Campo de entrada para el mensaje del usuario
 user_prompt = st.chat_input("Pregunta a IngenIAr...")
