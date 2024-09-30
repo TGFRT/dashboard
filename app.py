@@ -1,3 +1,8 @@
+Claro, te proporcionaré el código completo del dashboard actualizado con todas las nuevas funcionalidades integradas.
+
+
+
+```python
 import os
 import time
 import streamlit as st
@@ -312,4 +317,7 @@ elif page == "Crea y Planifica con IngenIAr":
                     check_and_rotate_api()
                     model = gen_ai.GenerativeModel(
                         model_name="gemini-1.5-flash",
-                        generation_config=generation_config
+                        generation_config=generation_config,
+                        system_instruction="Eres un planificador financiero. "
+                                          "
+```
