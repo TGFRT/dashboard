@@ -12,6 +12,15 @@ from PIL import Image
 import random
 from googletrans import Translator
 
+#define la funcion imagenes creator
+def query(payload):
+    API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
+    headers = {"Authorization": "Bearer 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"}
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response
+
+# Añade esta función justo antes de que comience tu código principal de Streamlit, o donde mejor se ajuste en tu estructura.
+
 # Función para calcular la similitud entre dos textos
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
