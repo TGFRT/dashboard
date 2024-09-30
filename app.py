@@ -21,54 +21,32 @@ st.set_page_config(page_title="IngenIAr Dashboard", page_icon=":brain:", layout=
 if "active_option" not in st.session_state:
     st.session_state.active_option = "Chat"  # Opción predeterminada
 
-# CSS personalizado para estilizar los botones y la barra lateral
+# CSS personalizado para la barra lateral
 st.markdown(
     f"""
     <style>
-    .stButton button {{
-        width: 100%;  /* Hace los botones del mismo ancho que la barra lateral */
-        background-color: #ff7f50;  /* Color naranja */
-        color: white;  /* Color del texto */
-        border-radius: 8px;  /* Bordes redondeados */
-        padding: 10px 0px;  /* Aumenta el tamaño del botón */
-        margin: 5px 0px;  /* Margen entre los botones */
-        font-size: 16px;  /* Aumenta el tamaño del texto */
-    }}
-
-    .stButton button:hover {{
-        background-color: #ff5733;  /* Un color más oscuro al pasar el mouse */
-    }}
-
-    /* Cambiar color del botón seleccionado */
-    .stButton.selected button {{
-        background-color: #4CAF50 !important;  /* Un color verde para el botón seleccionado */
-        color: white !important;  /* Asegúrate de que el texto siga siendo blanco */
+    .sidebar .sidebar-content {{
+        width: 250px;  /* Ancho de la barra lateral */
     }}
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Función para crear un botón estilizado que cambia a verde cuando está seleccionado
+# Función para crear un botón en la barra lateral
 def sidebar_button(label, option):
-    # Verifica si la opción actual es la seleccionada
+    # Verifica si la opción actual está seleccionada
     if st.session_state.active_option == option:
-        btn_class = "selected"
+        st.sidebar.button(label, key=option)
     else:
-        btn_class = ""
-
-    # Crea un botón en la barra lateral con el estilo aplicado
-    clicked = st.sidebar.markdown(f'<div class="stButton {btn_class}">{st.sidebar.button(label, key=option)}</div>', unsafe_allow_html=True)
-
-    # Actualiza la opción activa si se hace clic en el botón
-    if st.sidebar.button(label, key=f"{option}_click"):
-        st.session_state.active_option = option
+        if st.sidebar.button(label, key=option):
+            st.session_state.active_option = option
 
 # Menú de botones en la barra lateral
 st.sidebar.title("IngenIAr Dashboard")
 st.sidebar.markdown("### Navega por las opciones:")
 
-# Botones estilizados
+# Botones en la barra lateral
 sidebar_button("Chat", "Chat")
 sidebar_button("Otra Opción", "Otra Opción")
 
@@ -76,7 +54,7 @@ sidebar_button("Otra Opción", "Otra Opción")
 if st.session_state.active_option == "Chat":
     st.subheader("🤖 IngenIAr - Chat")
 
-    # Aquí iría el código de chat que ya has implementado
+    # Aquí iría el código del chat que ya has implementado
     st.write("Aquí está la interfaz de chat...")
 
 # Mostrar contenido para "Otra Opción"
