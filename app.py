@@ -42,7 +42,7 @@ option = st.sidebar.selectbox("Elige una opción:",
                                ("Chat con la IA", 
                                 "Planifica tu negocio", 
                                 "Marketing y ventas",
-                               "Operaciones y eficiencia"))
+                               "Operaciones y Eficiencia"))
 
 # API keys y configuración
 API_KEYS = [st.secrets["GOOGLE_API_KEY_1"],
