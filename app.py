@@ -19,7 +19,7 @@ def normalize_text(text):
 
 # Configura Streamlit
 st.set_page_config(
-    page_title="IngenIAr - Chat y Creador de Negocios",
+    page_title="IngenIAr - Dashboard",
     page_icon=":brain:",
     layout="centered",
 )
@@ -97,8 +97,11 @@ model = gen_ai.GenerativeModel(
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
 
-# Título del chatbot
-st.title("🤖 IngenIAr - Chat")
+# Título del dashboard
+st.title("🤖 IngenIAr - Dashboard")
+
+# Sección de Chat
+st.header("💬 Chat con IngenIAr")
 
 # Mostrar el historial de chat
 for message in st.session_state.chat_session.history:
@@ -162,33 +165,33 @@ st.write(f"Mensajes restantes: {remaining_messages}")
 # Sección para el Creador de Modelos de Negocio
 st.header("💼 Creador de Modelos de Negocio")
 
-# Funciones para generar el modelo de negocio
-def generate_business_model(idea):
-    check_and_rotate_api()  # Verifica si se debe rotar la clave API
-    try:
-        model_response = gen_ai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config=generation_config,
-            system_instruction=f"Genera un modelo de negocio para la siguiente idea: {idea}"
-        ).generate()
-        return model_response.text
-    except Exception as e:
-        st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
-        return None
+# Aquí puedes colocar tu otro código para la funcionalidad del creador de modelos de negocio.
+# Por ejemplo, podrías implementar un campo de entrada y un botón para generar el modelo de negocio.
 
-# Opciones para generar ideas de negocio
-idea = st.text_input("Ingresa una idea de negocio:")
+# Campo de entrada para la idea de negocio
+business_idea = st.text_input("Ingresa una idea de negocio:")
 if st.button("Generar Modelo de Negocio"):
-    if idea:
+    if business_idea:
         # Normaliza la idea
-        normalized_idea = normalize_text(idea)
+        normalized_business_idea = normalize_text(business_idea)
 
-        # Genera el modelo de negocio
-        business_model = generate_business_model(normalized_idea)
+        # Aquí debes implementar la lógica para generar el modelo de negocio usando tu API.
+        # Puedes usar la función de la API aquí para obtener el modelo y mostrarlo.
         
-        if business_model:
+        # Ejemplo de llamada a la API (ajusta según tu lógica)
+        try:
+            check_and_rotate_api()  # Verifica si se debe rotar la clave API
+            model_response = gen_ai.GenerativeModel(
+                model_name="gemini-1.5-flash",
+                generation_config=generation_config,
+                system_instruction=f"Genera un modelo de negocio para la siguiente idea: {normalized_business_idea}"
+            ).generate()
+            
             # Muestra la respuesta del modelo de negocio
             st.success("Modelo de negocio generado:")
-            st.markdown(business_model)
+            st.markdown(model_response.text)
+            
+        except Exception as e:
+            st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
     else:
         st.warning("Por favor, ingresa una idea de negocio antes de generar el modelo.")
