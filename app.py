@@ -460,30 +460,37 @@ elif option == "Marketing y ventas":
                 except Exception as e:
                     st.error(f"Ocurrió un error al generar la estrategia: {str(e)}")
 elif option == "Operaciones y Eficiencia":
+    # Operaciones y Eficiencia
+elif option == "Operaciones y Eficiencia":
     st.title("Operaciones y Eficiencia")
 
-    # Sección de Asistente de Tareas
-    st.header("Asistente de Tareas")
-    tareas = st.text_area("Introduce tus tareas y plazos (formato: Tarea - Fecha):")
-    if st.button("Organizar Tareas"):
-        if tareas:
-            # Aquí iría la lógica de organización y priorización
-            st.success("Tus tareas han sido organizadas. (Funcionalidad en desarrollo)")
-        else:
-            st.error("Por favor, introduce tus tareas.")
+    # Selección de opción dentro de Operaciones y Eficiencia
+    sub_option = st.selectbox("Elige una opción:", 
+                               ("Asistente de Tareas", 
+                                "Automatización de Procesos", 
+                                "Análisis de Datos"))
 
-    # Sección de Automatización de Procesos
-    st.header("Automatización de Procesos")
-    st.write("Esta sección te permitirá crear flujos de trabajo automatizados para trabajos repetitivos. (Funcionalidad en desarrollo)")
+    if sub_option == "Asistente de Tareas":
+        st.header("Asistente de Tareas")
+        tareas = st.text_area("Introduce tus tareas y plazos (formato: Tarea - Fecha):")
+        if st.button("Organizar Tareas"):
+            if tareas:
+                # Aquí iría la lógica de organización y priorización
+                st.success("Tus tareas han sido organizadas. (Funcionalidad en desarrollo)")
+            else:
+                st.error("Por favor, introduce tus tareas.")
 
-    # Sección de Análisis de Datos
-    st.header("Análisis de Datos")
-    datos_negocio = st.text_area("Introduce los datos de tu negocio:")
-    if st.button("Analizar Datos"):
-        if datos_negocio:
-            # Aquí iría la lógica de análisis de datos
-            st.success("Análisis en proceso... (Funcionalidad en desarrollo)")
-        else:
-            st.error("Por favor, introduce los datos de tu negocio.")
+    elif sub_option == "Automatización de Procesos":
+        st.header("Automatización de Procesos")
+        st.write("Esta sección te permitirá crear flujos de trabajo automatizados para trabajos repetitivos. (Funcionalidad en desarrollo)")
 
-# Aquí puedes continuar con el resto de las funcionalidades o configuraciones...
+    elif sub_option == "Análisis de Datos":
+        st.header("Análisis de Datos")
+        datos_negocio = st.text_area("Introduce los datos de tu negocio:")
+        if st.button("Analizar Datos"):
+            if datos_negocio:
+                # Aquí iría la lógica de análisis de datos
+                st.success("Análisis en proceso... (Funcionalidad en desarrollo)")
+            else:
+                st.error("Por favor, introduce los datos de tu negocio.")
+
