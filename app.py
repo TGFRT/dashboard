@@ -105,7 +105,7 @@ st.title("🤖 IngenIAr ")
 
 # Barra lateral para navegación
 st.sidebar.header("PANEL")
-page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Planifica tu negocio", "Crea y Planifica con IngenIAr"])
+page = st.sidebar.radio("Selecciona una opción:", ["Chat", "Crea y Planifica con IngenIAr"])
 
 # Sección de Chat
 if page == "Chat":
@@ -149,31 +149,6 @@ if page == "Chat":
         st.session_state.last_user_messages.clear()
         st.session_state.daily_request_count = 0
         st.success("Conversación borrada.")
-
-# Sección para el Creador de Modelos de Negocio
-elif page == "Planifica tu negocio":
-    st.header("💼 Planifica tu negocio")
-
-    business_idea = st.text_input("Ingresa una idea de negocio:")
-    if st.button("Generar Modelo de Negocio"):
-        if business_idea:
-            normalized_business_idea = normalize_text(business_idea)
-            
-            try:
-                check_and_rotate_api()
-                model_response = gen_ai.GenerativeModel(
-                    model_name="gemini-1.5-flash",
-                    generation_config=generation_config,
-                    system_instruction=f"Genera un modelo de negocio para la siguiente idea: {normalized_business_idea}"
-                ).generate()
-                
-                st.success("Modelo de negocio generado:")
-                st.markdown(model_response.text)
-                
-            except Exception as e:
-                st.error(f"Ocurrió un error al generar el modelo de negocio: {str(e)}")
-        else:
-            st.warning("Por favor, ingresa una idea de negocio antes de generar el modelo.")
 
 # Nueva sección: Crea y Planifica con IngenIAr
 elif page == "Crea y Planifica con IngenIAr":
@@ -319,5 +294,62 @@ elif page == "Crea y Planifica con IngenIAr":
                         model_name="gemini-1.5-flash",
                         generation_config=generation_config,
                         system_instruction="Eres un planificador financiero. "
-                                          "
+                                      "Proporciona un análisis realista basado en los datos proporcionados."
+                )
+
+                chat_session = model.start_chat(history=[])
+
+                progress = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.05)  # Simulación de tiempo de espera
+                    progress.progress(i + 1)
+
+                gemini_response = chat_session.send_message(prompt)
+
+                st.markdown(f"## Plan Financiero Generado:\n{gemini_response.text}")
+            except Exception as e:
+                st.error(f"Error al generar el plan financiero: {str(e)}")
+
+else:  # Opción: Validador de Ideas
+    st.header("Validador de Ideas de Negocio")
+
+    # Campo de entrada para la idea de negocio
+    idea_negocio = st.text_area("Describe tu idea de negocio")
+
+    # Botón para validar la idea
+    if st.button("Validar Idea"):
+        if not idea_negocio:
+            st.error("Por favor, ingresa una descripción de tu idea de negocio.")
+        else:
+            prompt = f"""
+            Evalúa la viabilidad de la siguiente idea de negocio:
+            Idea de negocio: {idea_negocio}
+            
+            Proporciona comentarios sobre:
+            - Oportunidades de mercado
+            - Potenciales desafíos
+            - Sugerencias para mejorar la idea
+            """
+
+            try:
+                model = gen_ai.GenerativeModel(
+                    model_name="gemini-1.5-flash",
+                    generation_config=generation_config,
+                    system_instruction="Eres un validador de ideas de negocio. "
+                                      "Proporciona comentarios sobre la viabilidad de la idea presentada."
+                )
+
+                chat_session = model.start_chat(history=[])
+
+                progress = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.05)  # Simulación de tiempo de espera
+                    progress.progress(i + 1)
+
+                gemini_response = chat_session.send_message(prompt)
+
+                st.markdown(f"## Comentarios sobre la Idea:\n{gemini_response.text}")
+            except Exception as e:
+                st.error(f"Ocurrió un error al validar la idea: {str(e)}")
+
 ```
