@@ -15,8 +15,6 @@ url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=
 # Cargar datos
 try:
     dfUsuarios = pd.read_csv(url)
-
-    # Asegurarse de que las columnas sean de tipo string y eliminar comas
     dfUsuarios['celular'] = dfUsuarios['celular'].astype(str).str.replace(',', '')
     dfUsuarios['contrasena'] = dfUsuarios['contrasena'].astype(str).str.replace(',', '')
 
@@ -93,16 +91,14 @@ else:
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 # Mostrar el saludo
                 st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
-                # Ocultar el formulario
-                st.session_state['mostrar_login'] = False  # Usar esta variable para ocultar el login
-                st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
+                # Limpiar los campos de entrada
+                st.experimental_set_query_params()
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
 
 # Si no hay inicio de sesión, mostrar el formulario
-if 'mostrar_login' not in st.session_state or st.session_state['mostrar_login']:
+if 'nombre_usuario' not in st.session_state:
     st.markdown("<div class='login-form'>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-
