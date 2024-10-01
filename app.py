@@ -27,12 +27,12 @@ except Exception as e:
 st.markdown("""
 <style>
     body {
-        background-color: #f0f2f5; /* Color de fondo */
+        background-color: #f0f2f5;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh; /* Altura completa de la ventana */
-        margin: 0; /* Sin margen */
+        height: 100vh;
+        margin: 0;
     }
     .login-form {
         display: flex;
@@ -40,15 +40,14 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         padding: 30px;
-        border-radius: 10px;
-        box-shadow: none; /* Sin sombra */
         width: 300px;
-        background: transparent; /* Fondo transparente */
+        background: white;
+        border-radius: 10px;
     }
     .login-form h2 {
         margin-bottom: 20px;
-        color: #ff9800; /* Naranja */
-        text-align: left; /* Alinear a la izquierda */
+        color: #ff9800;
+        text-align: left;
     }
     .login-form input {
         width: 100%;
@@ -58,7 +57,7 @@ st.markdown("""
         border-radius: 5px;
     }
     .login-form button {
-        background-color: #ff9800; /* Naranja */
+        background-color: #ff9800;
         color: white;
         border: none;
         padding: 10px;
@@ -66,18 +65,10 @@ st.markdown("""
         cursor: pointer;
         width: 100%;
         font-weight: bold;
-        transition: background-color 0.3s; /* Transición suave */
+        transition: background-color 0.3s;
     }
     .login-form button:hover {
-        background-color: #fb8c00; /* Naranja más oscuro */
-    }
-    .error-message {
-        color: red;
-        margin-top: 10px;
-    }
-    .success-message {
-        color: green;
-        margin-top: 10px;
+        background-color: #fb8c00;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -106,4 +97,3 @@ else:
                 st.error("Contraseña incorrecta.", icon="❌")
         else:
             st.error("Número de celular no encontrado.", icon="❌")
-
