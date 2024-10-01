@@ -85,7 +85,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sección de inicio de sesión
-st.markdown("<h2 style='text-align: left;'>Iniciar Sesión 👤</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: left;'>Iniciar Sesión ⭐</h2>", unsafe_allow_html=True)
 
 celular = st.text_input("Número de Celular:")
 contrasena = st.text_input("Contraseña:", type="password")
@@ -102,4 +102,3 @@ if st.button("Iniciar Sesión"):
             st.error("Contraseña incorrecta.", icon="❌")
     else:
         st.error("Número de celular no encontrado.", icon="❌")
-
