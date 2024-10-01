@@ -142,7 +142,7 @@ if option == "Chat con la IA":
 # Creador de Contenido
 elif option == "Planifica tu negocio":
     st.title("CREA Y PLANIFICA CON INGENIAR 💡")
-    option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas","Operaciones y eficiencia"))
+    option = st.selectbox("Elige una opción:", ("Generar Ideas de Negocio", "Generar Modelo de Negocio", "Planificador Financiero", "Validador de Ideas"))
 
     with st.spinner("Cargando..."):
         time.sleep(1)
