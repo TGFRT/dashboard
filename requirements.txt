@@ -1,8 +1,3 @@
-python-dotenv==1.0.1
-google-generativeai
-streamlit==1.30.0
-Pillow
-requests
-googletrans==4.0.0-rc1
-PyPDF2
-
+streamlit
+pandas
+plotly
