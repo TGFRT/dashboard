@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
 # Configuración de la aplicación
 st.set_page_config(
@@ -23,6 +22,16 @@ try:
     st.dataframe(dfUsuarios)  # Mostrar los datos en una tabla
 except Exception as e:
     st.error(f"Error al cargar los datos: {e}")
+
+# Campo de entrada para buscar nombre
+nombre_a_buscar = st.text_input("Ingrese el nombre a buscar:")
+
+# Verificar si el nombre está en el DataFrame
+if nombre_a_buscar:
+    if nombre_a_buscar in dfUsuarios['Nombre'].values:  # Ajusta 'Nombre' según el nombre de tu columna
+        st.success(f"El nombre '{nombre_a_buscar}' está en el documento.")
+    else:
+        st.error(f"El nombre '{nombre_a_buscar}' NO está en el documento.")
 
 # Función para graficar datos (puedes ajustar según tus necesidades)
 def cargarGraficos():
