@@ -95,7 +95,8 @@ if 'nombre_usuario' in st.session_state:
 
     # Mostrar los sueños existentes
     st.subheader("Tus Sueños")
-    for index, row in dfSueños[dfSueños['Nombre'] == nombre_usuario].iterrows():
+    sueños_usuario = dfSueños[dfSueños['Nombre'] == nombre_usuario]
+    for index, row in sueños_usuario.iterrows():
         st.write(f"Sueño: {row['Sueño']} - Nivel: {row['Nivel']}")
         objetivos_lista = row['Objetivos'].split('\n') if pd.notna(row['Objetivos']) else []
         for objetivo in objetivos_lista:
@@ -119,7 +120,8 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                st.experimental_rerun()  # Recargar la página para mostrar el registro de sueños
+                # Mostrar el registro de sueños directamente
+                st.experimental_rerun()  # O puedes omitirlo y permitir que el flujo continúe
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
