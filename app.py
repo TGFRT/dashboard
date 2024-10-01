@@ -89,8 +89,9 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                # Limpiar el formulario
-                del st.session_state['form_visible']  # Eliminar cualquier estado del formulario
+                # Limpiar el formulario si existe
+                if 'form_visible' in st.session_state:
+                    del st.session_state['form_visible']
                 # Mostrar el mensaje
                 st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
             else:
