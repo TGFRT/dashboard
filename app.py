@@ -91,11 +91,11 @@ else:
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 # Limpiar el formulario
                 st.session_state['form_visible'] = False
-                # Mostrar solo el mensaje
-                st.experimental_set_query_params()
+                st.experimental_rerun()  # Recargar para reflejar el nuevo estado
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
 
     st.markdown("</div>", unsafe_allow_html=True)
+
