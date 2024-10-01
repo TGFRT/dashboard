@@ -38,7 +38,7 @@ st.markdown("""
     }
     .login-form {
         background: white;
-        padding: 20px;
+        padding: 30px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         width: 300px;
@@ -46,7 +46,7 @@ st.markdown("""
     }
     .login-form h2 {
         margin-bottom: 20px;
-        color: #333;
+        color: #ff9800; /* Naranja */
     }
     .login-form input {
         width: 100%;
@@ -56,7 +56,7 @@ st.markdown("""
         border-radius: 5px;
     }
     .login-form button {
-        background-color: #ff9800;
+        background-color: #ff9800; /* Naranja */
         color: white;
         border: none;
         padding: 10px;
@@ -66,7 +66,15 @@ st.markdown("""
         font-weight: bold;
     }
     .login-form button:hover {
-        background-color: #fb8c00;
+        background-color: #fb8c00; /* Naranja más oscuro */
+    }
+    .error-message {
+        color: red;
+        margin-top: 10px;
+    }
+    .success-message {
+        color: green;
+        margin-top: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -86,11 +94,11 @@ if st.button("Iniciar Sesión"):
         fila = dfUsuarios[dfUsuarios['celular'] == celular_input]
         if fila['contrasena'].values[0] == contrasena:
             nombre_usuario = fila['nombre'].values[0]
-            st.success(f"Inicio de sesión exitoso. Bienvenido, {nombre_usuario}!")
+            st.success(f"Inicio de sesión exitoso. Bienvenido, {nombre_usuario}!", icon="✅")
         else:
-            st.error("Contraseña incorrecta.")
+            st.error("Contraseña incorrecta.", icon="❌")
     else:
-        st.error("Número de celular no encontrado.")
+        st.error("Número de celular no encontrado.", icon="❌")
 
 st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
