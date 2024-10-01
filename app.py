@@ -89,14 +89,13 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                # Mostrar solo el mensaje de éxito sin usar rerun
-                st.experimental_set_query_params()
-                st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.stop()  # Detener la ejecución aquí
+                # Limpiar el estado del formulario
+                st.session_state['form_visible'] = False
+                st.experimental_rerun()  # Recargar para mostrar solo el mensaje
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
 
     st.markdown("</div>", unsafe_allow_html=True)
+
