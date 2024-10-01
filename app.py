@@ -91,13 +91,12 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                # Mostrar el saludo
+                # Mostrar el saludo y limpiar el formulario
                 st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
-                # Limpiar los campos
-                celular = ""
-                contrasena = ""
+                # Limpiar los campos de entrada
+                st.session_state['celular'] = ""
+                st.session_state['contrasena'] = ""
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
-
