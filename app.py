@@ -50,6 +50,7 @@ st.markdown("""
     .login-form h2 {
         margin-bottom: 20px;
         color: #ff9800; /* Naranja */
+        text-align: left; /* Alinear a la izquierda */
     }
     .login-form input {
         width: 100%;
@@ -84,7 +85,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sección de inicio de sesión
-st.markdown("<h2 style='text-align: center;'>Iniciar Sesión</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: left;'>Iniciar Sesión 👤</h2>", unsafe_allow_html=True)
 
 celular = st.text_input("Número de Celular:")
 contrasena = st.text_input("Contraseña:", type="password")
