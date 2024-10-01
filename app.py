@@ -98,4 +98,3 @@ else:
             st.error("Número de celular no encontrado", icon="❌")
 
     st.markdown("</div>", unsafe_allow_html=True)
-
