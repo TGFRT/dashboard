@@ -76,8 +76,6 @@ st.markdown("""
 # Verificar si el usuario ya ha iniciado sesión
 if 'nombre_usuario' in st.session_state:
     st.success(f"Hola {st.session_state['nombre_usuario']}, tus datos se cargaron correctamente!", icon="✅")
-    
-    # Mostrar sueños
     st.write(f"Tu sueño: {st.session_state['sueño_usuario']}")
     
     # Botón para continuar
@@ -99,9 +97,14 @@ else:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 st.session_state['sueño_usuario'] = fila['sueños'].values[0]
-                # Mostrar el saludo
+                # Mostrar el saludo y el botón
                 st.success(f"Hola {st.session_state['nombre_usuario']}, tus datos se cargaron correctamente!", icon="✅")
+                st.write(f"Tu sueño: {st.session_state['sueño_usuario']}")
+                # Botón para continuar
+                if st.button("Continuar"):
+                    st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
             else:
                 st.error("Contraseña incorrecta.", icon="❌")
         else:
             st.error("Número de celular no encontrado.", icon="❌")
+
