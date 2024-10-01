@@ -11,13 +11,12 @@ st.set_page_config(
 )
 
 # ID de Google Sheets
-gsheetid = '1SHgetxf8JaTkgHFKhz78qX6V2Y6LXrRTVBIsFYL9xjE'
+gsheetid = '1OVVjcFBFDOYcbmfqriYmfRke2MexzbjSvbknTwcnatk'
 
 # URLs para las hojas
 urls = {
-    'ventas': f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=0',
-    'categorias': f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=117226359',
-    'mes': f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=1884410336'
+    'RegistrosUsuarios': f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=0',
+ 
 }
 
 # Cargar datos
