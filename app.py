@@ -28,21 +28,20 @@ except Exception as e:
 # Estilos CSS para mejorar el diseño
 st.markdown("""
 <style>
-    .login-container {
+    body {
+        background-color: #f0f2f5; /* Color de fondo */
+    }
+    .login-form {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        background-color: #f0f2f5;
-    }
-    .login-form {
-        background: white;
         padding: 30px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         width: 300px;
-        text-align: center;
+        margin: auto; /* Centrar el formulario */
+        background: white; /* Fondo blanco */
     }
     .login-form h2 {
         margin-bottom: 20px;
@@ -80,7 +79,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sección de inicio de sesión
-st.markdown('<div class="login-container">', unsafe_allow_html=True)
 st.markdown('<div class="login-form">', unsafe_allow_html=True)
 st.markdown("<h2>Iniciar Sesión</h2>", unsafe_allow_html=True)
 
@@ -100,5 +98,4 @@ if st.button("Iniciar Sesión"):
     else:
         st.error("Número de celular no encontrado.", icon="❌")
 
-st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
