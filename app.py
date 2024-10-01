@@ -75,7 +75,7 @@ st.markdown("""
 
 # Verificar si el usuario ya ha iniciado sesión
 if 'nombre_usuario' in st.session_state:
-    st.success(f"Hola {st.session_state['nombre_usuario']}", icon="✅")
+    st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
 else:
     # Sección de inicio de sesión
     st.markdown("<h2 style='text-align: left;'>Iniciar Sesión ⭐</h2>", unsafe_allow_html=True)
@@ -92,9 +92,12 @@ else:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 # Mostrar el saludo
-                st.success(f"Hola {st.session_state['nombre_usuario']}", icon="✅")
-                st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
+                st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
+                # Limpiar los campos
+                celular = ""
+                contrasena = ""
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
+
