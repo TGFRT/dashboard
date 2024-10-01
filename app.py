@@ -13,33 +13,22 @@ st.set_page_config(
 # ID de Google Sheets
 gsheetid = '1OVVjcFBFDOYcbmfqriYmfRke2MexzbjSvbknTwcnatk'
 
-# URLs para las hojas
-urls = {
-    'RegistrosUsuarios': f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=0',
- 
-}
+# URL para la hoja
+url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=0'
 
 # Cargar datos
 try:
-    dfVentas = pd.read_csv(urls['ventas'])
-    dfCategorias = pd.read_csv(urls['categorias'])
-    dfMes = pd.read_csv(urls['mes'], usecols=[0, 1])
+    dfUsuarios = pd.read_csv(url)
+    st.write("Datos de Registros de Usuarios:")
+    st.dataframe(dfUsuarios)  # Mostrar los datos en una tabla
 except Exception as e:
     st.error(f"Error al cargar los datos: {e}")
 
-# Funciones para cargar gráficos
-def cargarVentasCategoria():
-    dfGrupo = dfCategorias.groupby('categoria')['ventas'].sum().reset_index()
-    fig = px.bar(dfGrupo, x='categoria', y='ventas', title="Ventas por Categoría")
-    st.plotly_chart(fig, use_container_width=True)
+# Función para graficar datos (puedes ajustar según tus necesidades)
+def cargarGraficos():
+    if 'column1' in dfUsuarios.columns and 'column2' in dfUsuarios.columns:  # Ajusta los nombres de las columnas
+        fig = px.bar(dfUsuarios, x='column1', y='column2', title="Ejemplo de Gráfico")
+        st.plotly_chart(fig, use_container_width=True)
 
-def cargarVentasMes():
-    fig = px.bar(dfMes, x='categoria', y='sum Total', title="Ventas por Mes")
-    st.plotly_chart(fig, use_container_width=True)
-
-# Diseño de columnas
-c1, c2 = st.columns(2)
-with c1:
-    cargarVentasCategoria()
-with c2:
-    cargarVentasMes()
+# Llama a la función para cargar gráficos
+cargarGraficos()
