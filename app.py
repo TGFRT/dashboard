@@ -18,6 +18,8 @@ url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=
 # Cargar datos
 try:
     dfUsuarios = pd.read_csv(url)
+    # Limpiar los números de celular eliminando las comas
+    dfUsuarios['celular'] = dfUsuarios['celular'].str.replace(',', '').astype(str)
     st.write("Datos de Registros de Usuarios:")
     st.dataframe(dfUsuarios)  # Mostrar los datos en una tabla
     st.write("Columnas disponibles:", dfUsuarios.columns.tolist())  # Mostrar nombres de columnas
@@ -41,6 +43,8 @@ contrasena = st.text_input("Contraseña:", type="password")
 
 # Verificar si el celular y la contraseña son correctos
 if st.button("Iniciar Sesión"):
+    # Limpiar el celular ingresado para comparación
+    celular = celular.replace(',', '')
     if celular in dfUsuarios['celular'].values:
         # Verificar si la contraseña coincide en la misma fila
         fila = dfUsuarios[dfUsuarios['celular'] == celular]
