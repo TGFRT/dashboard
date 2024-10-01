@@ -102,7 +102,7 @@ if 'nombre_usuario' in st.session_state:
         for objetivo in objetivos_lista:
             if st.checkbox(objetivo):
                 # Al marcar el objetivo, actualizar la lista en Google Sheets
-                actualizar_objetivos(row['Nombre'], row['Sueño'], objetivo)  # Implementa esta función
+                actualizar_objetivos(row['Nombre'], row['sueños'], objetivo)  # Implementa esta función
 
 else:
     # Sección de inicio de sesión
