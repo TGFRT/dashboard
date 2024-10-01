@@ -90,8 +90,9 @@ else:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 # Limpiar el formulario
-                st.session_state['form_visible'] = False
-                st.experimental_rerun()  # Recargar para reflejar el nuevo estado
+                del st.session_state['form_visible']  # Eliminar cualquier estado del formulario
+                # Mostrar el mensaje
+                st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
