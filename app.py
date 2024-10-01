@@ -98,6 +98,7 @@ else:
         if celular_input in dfUsuarios['celular'].values:
             fila = dfUsuarios[dfUsuarios['celular'] == celular_input]
             if fila['contrasena'].values[0] == contrasena:
+                # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 st.session_state['sueño_usuario'] = fila['sueños'].values[0]
                 st.success(f"Inicio de sesión exitoso. Hola {st.session_state['nombre_usuario']}, tú haces: {st.session_state['sueño_usuario']}!", icon="✅")
