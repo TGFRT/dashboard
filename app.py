@@ -18,7 +18,7 @@ url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=
 try:
     dfUsuarios = pd.read_csv(url)
 
-    # Asegurarse de que la columna 'celular' y 'contrasena' sean de tipo string y eliminar comas
+    # Asegurarse de que las columnas sean de tipo string y eliminar comas
     dfUsuarios['celular'] = dfUsuarios['celular'].astype(str).str.replace(',', '')
     dfUsuarios['contrasena'] = dfUsuarios['contrasena'].astype(str).str.replace(',', '')
 
@@ -97,7 +97,8 @@ if st.button("Iniciar Sesión"):
         fila = dfUsuarios[dfUsuarios['celular'] == celular_input]
         if fila['contrasena'].values[0] == contrasena:
             nombre_usuario = fila['nombre'].values[0]
-            st.success(f"Inicio de sesión exitoso. Bienvenido, {nombre_usuario}!", icon="✅")
+            sueño_usuario = fila['sueños'].values[0]  # Obtener el sueño del usuario
+            st.success(f"Inicio de sesión exitoso. Hola {nombre_usuario}, tú haces: {sueño_usuario}!", icon="✅")
         else:
             st.error("Contraseña incorrecta.", icon="❌")
     else:
