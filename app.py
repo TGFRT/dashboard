@@ -91,12 +91,18 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                # Mostrar el saludo y limpiar el formulario
+                # Mostrar el saludo
                 st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
-                # Limpiar los campos de entrada
-                st.session_state['celular'] = ""
-                st.session_state['contrasena'] = ""
+                # Ocultar el formulario
+                st.session_state['mostrar_login'] = False  # Usar esta variable para ocultar el login
+                st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
+
+# Si no hay inicio de sesión, mostrar el formulario
+if 'mostrar_login' not in st.session_state or st.session_state['mostrar_login']:
+    st.markdown("<div class='login-form'>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
