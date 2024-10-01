@@ -29,10 +29,27 @@ nombre_a_buscar = st.text_input("Ingrese el nombre a buscar:")
 
 # Verificar si el nombre está en el DataFrame
 if nombre_a_buscar:
-    if nombre_a_buscar in dfUsuarios['nombre'].values:  # Ajusta 'Nombre' según el nombre de tu columna
+    if nombre_a_buscar in dfUsuarios['Nombre'].values:  # Ajusta 'Nombre' según el nombre de tu columna
         st.success(f"El nombre '{nombre_a_buscar}' está en el documento.")
     else:
         st.error(f"El nombre '{nombre_a_buscar}' NO está en el documento.")
+
+# Sección de inicio de sesión
+st.header("Iniciar Sesión")
+celular = st.text_input("Número de Celular:")
+contrasena = st.text_input("Contraseña:", type="password")
+
+# Verificar si el celular y la contraseña son correctos
+if st.button("Iniciar Sesión"):
+    if celular in dfUsuarios['celular'].values:
+        # Verificar si la contraseña coincide en la misma fila
+        fila = dfUsuarios[dfUsuarios['celular'] == celular]
+        if fila['contrasena'].values[0] == contrasena:
+            st.success("Inicio de sesión exitoso.")
+        else:
+            st.error("Contraseña incorrecta.")
+    else:
+        st.error("Número de celular no encontrado.")
 
 # Función para graficar datos (puedes ajustar según tus necesidades)
 def cargarGraficos():
