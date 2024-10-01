@@ -67,6 +67,7 @@ st.markdown("""
         cursor: pointer;
         width: 100%;
         font-weight: bold;
+        transition: background-color 0.3s; /* Transición suave */
     }
     .login-form button:hover {
         background-color: #fb8c00; /* Naranja más oscuro */
