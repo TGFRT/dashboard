@@ -30,6 +30,11 @@ st.markdown("""
 <style>
     body {
         background-color: #f0f2f5; /* Color de fondo */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh; /* Altura completa de la ventana */
+        margin: 0; /* Sin margen */
     }
     .login-form {
         display: flex;
@@ -38,10 +43,9 @@ st.markdown("""
         justify-content: center;
         padding: 30px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: none; /* Sin sombra */
         width: 300px;
-        margin: auto; /* Centrar el formulario */
-        background: white; /* Fondo blanco */
+        background: transparent; /* Fondo transparente */
     }
     .login-form h2 {
         margin-bottom: 20px;
@@ -79,8 +83,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sección de inicio de sesión
-st.markdown('<div class="login-form">', unsafe_allow_html=True)
-st.markdown("<h2>Iniciar Sesión</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>Iniciar Sesión</h2>", unsafe_allow_html=True)
 
 celular = st.text_input("Número de Celular:")
 contrasena = st.text_input("Contraseña:", type="password")
@@ -97,5 +100,3 @@ if st.button("Iniciar Sesión"):
             st.error("Contraseña incorrecta.", icon="❌")
     else:
         st.error("Número de celular no encontrado.", icon="❌")
-
-st.markdown('</div>', unsafe_allow_html=True)
