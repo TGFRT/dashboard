@@ -89,7 +89,11 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                st.experimental_rerun()  # Recargar la página para mostrar solo el mensaje
+                # Mostrar solo el mensaje de éxito sin usar rerun
+                st.experimental_set_query_params()
+                st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
+                st.markdown("</div>", unsafe_allow_html=True)
+                st.stop()  # Detener la ejecución aquí
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
