@@ -93,8 +93,8 @@ else:
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 # Mostrar el saludo
                 st.success(f"Hola {st.session_state['nombre_usuario']}", icon="✅")
+                st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
-
