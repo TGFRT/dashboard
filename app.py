@@ -17,7 +17,6 @@ try:
     dfUsuarios = pd.read_csv(url)
     dfUsuarios['celular'] = dfUsuarios['celular'].astype(str).str.replace(',', '')
     dfUsuarios['contrasena'] = dfUsuarios['contrasena'].astype(str).str.replace(',', '')
-
 except Exception as e:
     st.error(f"Error al cargar los datos: {e}")
 
@@ -76,6 +75,7 @@ if 'nombre_usuario' in st.session_state:
     st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
 else:
     # Sección de inicio de sesión
+    st.markdown("<div class='login-form'>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: left;'>Iniciar Sesión ⭐</h2>", unsafe_allow_html=True)
 
     celular = st.text_input("Número de Celular:")
@@ -89,16 +89,11 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                # Mostrar el saludo
-                st.success(f"Hola {st.session_state['nombre_usuario']} tus datos fueron cargados correctamente", icon="✅")
-                # Limpiar los campos de entrada
-                st.experimental_set_query_params()
+                st.experimental_rerun()  # Recargar para mostrar el mensaje
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
 
-# Si no hay inicio de sesión, mostrar el formulario
-if 'nombre_usuario' not in st.session_state:
-    st.markdown("<div class='login-form'>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+
