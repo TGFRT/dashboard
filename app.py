@@ -89,13 +89,13 @@ else:
             if fila['contrasena'].values[0] == contrasena:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
-                # Limpiar el estado del formulario
+                # Limpiar el formulario
                 st.session_state['form_visible'] = False
-                st.experimental_rerun()  # Recargar para mostrar solo el mensaje
+                # Mostrar solo el mensaje
+                st.experimental_set_query_params()
             else:
                 st.error("Contraseña incorrecta", icon="❌")
         else:
             st.error("Número de celular no encontrado", icon="❌")
 
     st.markdown("</div>", unsafe_allow_html=True)
-
