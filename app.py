@@ -9,14 +9,67 @@ st.set_page_config(
 )
 
 # ID de Google Sheets
-gsheetid = '1OVVjcFBFDOYcbmfqriYmfRke2MexzbjSvbknTwcnatk'  # Reemplaza con tu ID de Google Sheets
+gsheetid = '1OVVjcFBFDOYcbmfqriYmfRke2MexzbjSvbknTwcnatk'  # Reemplaza con tu ID
 url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=0'
 
 # Cargar datos
 try:
-    dfSueños = pd.read_csv(url)
+    dfUsuarios = pd.read_csv(url)
+    dfUsuarios['celular'] = dfUsuarios['celular'].astype(str).str.replace(',', '')
+    dfUsuarios['contrasena'] = dfUsuarios['contrasena'].astype(str).str.replace(',', '')
+    dfSueños = pd.read_csv(url)  # Cambia según tu lógica para cargar sueños
 except Exception as e:
     st.error(f"Error al cargar los datos: {e}")
+
+# Estilos CSS para mejorar el diseño
+st.markdown("""
+<style>
+    body {
+        background-color: #f0f2f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        width: 300px;
+        background: white;
+        border-radius: 10px;
+    }
+    .login-form h2 {
+        margin-bottom: 20px;
+        color: #ff9800;
+        text-align: left;
+    }
+    .login-form input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .login-form button {
+        background-color: #ff9800;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+    .login-form button:hover {
+        background-color: #fb8c00;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Verificar si el usuario ya ha iniciado sesión
 if 'nombre_usuario' in st.session_state:
