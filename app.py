@@ -101,7 +101,7 @@ else:
                 # Guardar datos en la sesión
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 st.session_state['sueño_usuario'] = fila['sueños'].values[0]
-                st.success(f"Inicio de sesión exitoso. Hola {st.session_state['nombre_usuario']}, tú haces: {st.session_state['sueño_usuario']}!", icon="✅")
+                st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
             else:
                 st.error("Contraseña incorrecta.", icon="❌")
         else:
