@@ -75,7 +75,14 @@ st.markdown("""
 
 # Verificar si el usuario ya ha iniciado sesión
 if 'nombre_usuario' in st.session_state:
-    st.success(f"Hola {st.session_state['nombre_usuario']}, tú haces: {st.session_state['sueño_usuario']}!", icon="✅")
+    st.success(f"Hola {st.session_state['nombre_usuario']}, tus datos se cargaron correctamente!", icon="✅")
+    
+    # Mostrar sueños
+    st.write(f"Tu sueño: {st.session_state['sueño_usuario']}")
+    
+    # Botón para continuar
+    if st.button("Continuar"):
+        st.experimental_rerun()  # Recargar la página para reflejar el nuevo estado
 else:
     # Sección de inicio de sesión
     st.markdown("<h2 style='text-align: left;'>Iniciar Sesión ⭐</h2>", unsafe_allow_html=True)
@@ -93,7 +100,7 @@ else:
                 st.session_state['nombre_usuario'] = fila['nombre'].values[0]
                 st.session_state['sueño_usuario'] = fila['sueños'].values[0]
                 # Mostrar el saludo
-                st.success(f"Hola {st.session_state['nombre_usuario']}, tú haces: {st.session_state['sueño_usuario']}!", icon="✅")
+                st.success(f"Hola {st.session_state['nombre_usuario']}, tus datos se cargaron correctamente!", icon="✅")
             else:
                 st.error("Contraseña incorrecta.", icon="❌")
         else:
