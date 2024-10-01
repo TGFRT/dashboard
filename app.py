@@ -19,8 +19,9 @@ url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=
 try:
     dfUsuarios = pd.read_csv(url)
 
-    # Asegurarse de que la columna 'celular' sea de tipo string
+    # Asegurarse de que la columna 'celular' y 'contrasena' sean de tipo string y eliminar comas
     dfUsuarios['celular'] = dfUsuarios['celular'].astype(str).str.replace(',', '')
+    dfUsuarios['contrasena'] = dfUsuarios['contrasena'].astype(str).str.replace(',', '')
 
     st.write("Datos de Registros de Usuarios:")
     st.dataframe(dfUsuarios)  # Mostrar los datos en una tabla
