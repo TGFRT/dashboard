@@ -10,8 +10,6 @@ st.set_page_config(
 
 # ID de Google Sheets
 gsheetid = '1OVVjcFBFDOYcbmfqriYmfRke2MexzbjSvbknTwcnatk'
-
-# URL para la hoja
 url = f'https://docs.google.com/spreadsheets/d/{gsheetid}/export?format=csv&gid=0'
 
 # Cargar datos
@@ -84,22 +82,26 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Sección de inicio de sesión
-st.markdown("<h2 style='text-align: left;'>Iniciar Sesión ⭐</h2>", unsafe_allow_html=True)
+# Si ya se ha iniciado sesión, mostrar mensaje de saludo
+if 'nombre_usuario' in st.session_state:
+    st.success(f"Hola {st.session_state['nombre_usuario']}, tú haces: {st.session_state['sueño_usuario']}!", icon="✅")
+else:
+    # Sección de inicio de sesión
+    st.markdown("<h2 style='text-align: left;'>Iniciar Sesión ⭐</h2>", unsafe_allow_html=True)
 
-celular = st.text_input("Número de Celular:")
-contrasena = st.text_input("Contraseña:", type="password")
+    celular = st.text_input("Número de Celular:")
+    contrasena = st.text_input("Contraseña:", type="password")
 
-# Verificar si el celular y la contraseña son correctos
-if st.button("Iniciar Sesión"):
-    celular_input = celular.replace(',', '')
-    if celular_input in dfUsuarios['celular'].values:
-        fila = dfUsuarios[dfUsuarios['celular'] == celular_input]
-        if fila['contrasena'].values[0] == contrasena:
-            nombre_usuario = fila['nombre'].values[0]
-            sueño_usuario = fila['sueños'].values[0]  # Obtener el sueño del usuario
-            st.success(f"Inicio de sesión exitoso. Hola {nombre_usuario}, tú haces: {sueño_usuario}!", icon="✅")
+    # Verificar si el celular y la contraseña son correctos
+    if st.button("Iniciar Sesión"):
+        celular_input = celular.replace(',', '')
+        if celular_input in dfUsuarios['celular'].values:
+            fila = dfUsuarios[dfUsuarios['celular'] == celular_input]
+            if fila['contrasena'].values[0] == contrasena:
+                st.session_state['nombre_usuario'] = fila['nombre'].values[0]
+                st.session_state['sueño_usuario'] = fila['sueños'].values[0]
+                st.success(f"Inicio de sesión exitoso. Hola {st.session_state['nombre_usuario']}, tú haces: {st.session_state['sueño_usuario']}!", icon="✅")
+            else:
+                st.error("Contraseña incorrecta.", icon="❌")
         else:
-            st.error("Contraseña incorrecta.", icon="❌")
-    else:
-        st.error("Número de celular no encontrado.", icon="❌")
+            st.error("Número de celular no encontrado.", icon="❌")
