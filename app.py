@@ -36,7 +36,7 @@ if st.button("Iniciar Sesión"):
     if celular_input in dfUsuarios['celular'].values:
         fila = dfUsuarios[dfUsuarios['celular'] == celular_input]
         if fila['contrasena'].values[0] == contrasena:
-            nombre_usuario = fila['Nombre'].values[0]  # Ajusta 'Nombre' según el nombre de tu columna
+            nombre_usuario = fila['nombre'].values[0]  # Ajusta 'Nombre' según el nombre de tu columna
             st.success(f"Inicio de sesión exitoso. Bienvenido, {nombre_usuario}!")
         else:
             st.error("Contraseña incorrecta.")
