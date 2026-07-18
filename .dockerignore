@@ -1,0 +1,14 @@
+.git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite
+*.db
+*.log
+.env
+.env.example
+.vscode/
+node_modules/
+.idea/
+.DS_Store

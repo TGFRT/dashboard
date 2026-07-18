@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosistema SaaS - Centro de Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Glow Effect -->
+    <div class="ambient-glow">
+        <div class="glow glow-purple"></div>
+        <div class="glow glow-cyan"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header glass">
+            <div class="header-logo">
+                <i class="fa-solid fa-network-wired logo-icon"></i>
+                <div class="header-text">
+                    <h1>SaaS Ecosistema <span>Control Hub</span></h1>
+                    <p>Supervisión centralizada y acceso de inquilinos</p>
+                </div>
+            </div>
+            <div class="api-connector">
+                <div class="api-input-group">
+                    <label for="apiUrlInput"><i class="fa-solid fa-server"></i> API URL</label>
+                    <input type="text" id="apiUrlInput" value="https://automatizaciondb.onrender.com/api">
+                </div>
+                <div class="toggle-container">
+                    <span class="toggle-label">Modo:</span>
+                    <button id="btnToggleMode" class="btn-mode-toggle real-data" title="Alternar entre datos reales de API y simulación">
+                        <i class="fa-solid fa-database"></i> <span>Datos de API</span>
+                    </button>
+                </div>
+                <button id="btnReconnect" class="btn-primary" title="Refrescar datos y verificar conexión"><i class="fa-solid fa-rotate"></i> Conectar</button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            <!-- Left Panel: Ecosystem Map -->
+            <section class="grid-card glass landscape-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-diagram-project text-cyan"></i> Mapa del Ecosistema e Integraciones</h2>
+                    <span class="badge badge-cyan">Visual</span>
+                </div>
+                <div class="architecture-diagram">
+                    <!-- API Central -->
+                    <div class="node node-api" id="nodeApi">
+                        <div class="node-icon"><i class="fa-solid fa-database"></i></div>
+                        <div class="node-title">core-db-api</div>
+                        <div class="node-subtitle">automatizaciondb</div>
+                        <div class="node-tech">Python FastAPI</div>
+                    </div>
+
+                    <!-- Super Admin Panel -->
+                    <div class="node node-admin" id="nodeAdmin">
+                        <div class="node-icon"><i class="fa-solid fa-user-shield"></i></div>
+                        <div class="node-title">Super Admin</div>
+                        <div class="node-subtitle">PANELEMPRESA</div>
+                        <div class="node-tech">Gestión B2B</div>
+                    </div>
+
+                    <!-- Clients Panel -->
+                    <div class="node node-client" id="nodeClient">
+                        <div class="node-icon"><i class="fa-solid fa-shop"></i></div>
+                        <div class="node-title">Portal Inquilino</div>
+                        <div class="node-subtitle">PANELCLIENTES</div>
+                        <div class="node-tech">Config. Comercio</div>
+                    </div>
+
+                    <!-- Store Front -->
+                    <div class="node node-store" id="nodeStore">
+                        <div class="node-icon"><i class="fa-solid fa-shopping-bag"></i></div>
+                        <div class="node-title">Tienda Online</div>
+                        <div class="node-subtitle">tienda (B2C)</div>
+                        <div class="node-tech">E-Commerce</div>
+                    </div>
+
+                    <!-- SVG Connections for dynamic lines -->
+                    <svg class="diagram-connections">
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:var(--accent-purple);stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:var(--accent-cyan);stop-opacity:0.8" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Connection paths will be defined dynamically or static -->
+                        <!-- Line: Admin to API -->
+                        <path d="M 280,240 Q 350,180 420,180" class="conn-path conn-admin-api" />
+                        <!-- Line: Client to API -->
+                        <path d="M 280,390 Q 350,350 420,220" class="conn-path conn-client-api" />
+                        <!-- Line: Store to API -->
+                        <path d="M 580,220 Q 650,350 720,390" class="conn-path conn-store-api" />
+                        <!-- Line: Store to Client (Configuration load) -->
+                        <path d="M 720,390 L 280,390" class="conn-path conn-store-client" style="stroke-dasharray: 5 5;" />
+                    </svg>
+                </div>
+                
+                <div class="flow-explanations">
+                    <div class="flow-item">
+                        <span class="flow-dot dot-admin"></span>
+                        <p><strong>PANELEMPRESA</strong> registra y activa negocios en la API.</p>
+                    </div>
+                    <div class="flow-item">
+                        <span class="flow-dot dot-client"></span>
+                        <p><strong>PANELCLIENTES</strong> almacena logo, sedes, cartas e integraciones de pago.</p>
+                    </div>
+                    <div class="flow-item">
+                        <span class="flow-dot dot-store"></span>
+                        <p><strong>La Tienda B2C</strong> recupera la carta configurada y procesa compras con Izipay.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Live Stats -->
+            <section class="grid-card glass stats-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-chart-simple text-purple"></i> Estado del Negocio y API</h2>
+                    <div class="status-indicator-wrapper">
+                        <span id="apiStatusText" class="status-text">Cargando...</span>
+                        <span id="apiStatusDot" class="status-dot offline"></span>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">Comercios Registrados</span>
+                        <strong id="statTotalNegocios">--</strong>
+                        <div class="stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> Inquilinos</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Planes Activos</span>
+                        <strong id="statPlanesActivos">--</strong>
+                        <span class="stat-detail">Cuentas Habilitadas</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Cuentas Suspendidas</span>
+                        <strong id="statPlanesSuspendidos" class="text-orange">--</strong>
+                        <span class="stat-detail">Requieren Atención</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Total Sedes / Sucursales</span>
+                        <strong id="statTotalSedes">--</strong>
+                        <span class="stat-detail">Locales comerciales</span>
+                    </div>
+                </div>
+
+                <!-- Distribution of Plans -->
+                <div class="plans-distribution">
+                    <h3>Distribución de Planes de Suscripción</h3>
+                    <div class="plan-progress-wrapper">
+                        <div class="plan-progress-header">
+                            <span>Plan Básico</span>
+                            <span id="planBasicoPct">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill bg-cyan" id="planBasicoBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="plan-progress-wrapper">
+                        <div class="plan-progress-header">
+                            <span>Plan PRO</span>
+                            <span id="planProPct">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill bg-purple" id="planProBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="plan-progress-wrapper">
+                        <div class="plan-progress-header">
+                            <span>Plan SuperPRO</span>
+                            <span id="planSuperProPct">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill bg-emerald" id="planSuperProBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Launchpad Section -->
+        <section class="launchpad-section glass">
+            <div class="section-title-wrapper">
+                <h2><i class="fa-solid fa-rocket text-emerald"></i> Lanzadera de Aplicaciones Locales</h2>
+                <p>Navega directamente a cada uno de tus módulos clonados</p>
+            </div>
+            
+            <div class="launch-cards-grid">
+                <!-- Card 1: Super Admin Panel -->
+                <div class="launch-card">
+                    <div class="launch-card-icon admin-bg"><i class="fa-solid fa-user-shield"></i></div>
+                    <div class="launch-card-info">
+                        <h3>Panel de Empresa</h3>
+                        <p>Gestión de inquilinos, asignación de planes de cobro y estatus general.</p>
+                        <div class="credential-box">
+                            <strong>Usuario:</strong> <code>superadmin</code><br>
+                            <strong>Clave:</strong> <code>serpaureqgom</code>
+                        </div>
+                        <a href="PANELEMPRESA/index.html" class="btn-launch" target="_blank">
+                            Ir al Panel Admin <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 2: Merchant Portal -->
+                <div class="launch-card">
+                    <div class="launch-card-icon client-bg"><i class="fa-solid fa-shop"></i></div>
+                    <div class="launch-card-info">
+                        <h3>Portal de Clientes</h3>
+                        <p>Panel para el restaurante. Configura sedes, menús, logo y pagos en línea.</p>
+                        <div class="credential-box">
+                            <strong>Login:</strong> Nombre del restaurante creado en el Panel Admin y contraseña asignada.
+                        </div>
+                        <a href="PANELCLIENTES/index.html" class="btn-launch" target="_blank">
+                            Ir al Portal Inquilino <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 3: Store demo -->
+                <div class="launch-card">
+                    <div class="launch-card-icon store-bg"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <div class="launch-card-info">
+                        <h3>Tienda Online Demo</h3>
+                        <p>Visualiza el e-commerce del cliente final. Carga menús y prueba el checkout simulado.</p>
+                        <div class="credential-box flex-column">
+                            <strong>Parámetro de carga en URL:</strong>
+                            <div class="store-selector">
+                                <label for="storeSelector">Cargar negocio:</label>
+                                <select id="storeSelector">
+                                    <option value="Agencia Alfa">Agencia Alfa</option>
+                                    <option value="Restaurante Alfa">Restaurante Alfa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="btnLaunchStore" class="btn-launch">
+                            Ver Tienda Activa <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation & Guide -->
+        <section class="docs-section glass">
+            <h2><i class="fa-solid fa-circle-info text-cyan"></i> Guía Rápida de Funcionamiento e Integración</h2>
+            <div class="docs-grid">
+                <div class="doc-block">
+                    <h3>1. Levantar la Base de Datos Local</h3>
+                    <p>Si deseas levantar el servidor localmente en lugar de usar Render, navega a la carpeta <code>automatizaciondb</code> y ejecuta:</p>
+                    <pre><code>pip install -r requirements.txt
+# Configura DATABASE_URL en un archivo .env
+python main.py</code></pre>
+                    <p>La API iniciará en <code>http://localhost:8000</code>. Luego puedes cambiar la API URL arriba en este dashboard y conectarla.</p>
+                </div>
+                <div class="doc-block">
+                    <h3>2. El ciclo completo de prueba</h3>
+                    <p>Puedes probar todo el ecosistema de principio a fin de la siguiente manera:</p>
+                    <ol>
+                        <li>Abre el <strong>Panel de Empresa</strong> y registra un negocio (ej. <em>Pizzería Bella</em>). Guarda su contraseña generada.</li>
+                        <li>Haz clic en <strong>Conectar API</strong> (en el Panel de Empresa) para crear la tabla <code>negocios</code> en la base de datos si no se ha inicializado.</li>
+                        <li>Abre el <strong>Portal de Clientes</strong> e inicia sesión con el nombre de tu negocio y su clave.</li>
+                        <li>Agrega sedes, carga algunos platos al menú con precios y fotos, y haz clic en <strong>Guardar Todo</strong>.</li>
+                        <li>Regresa a este dashboard, selecciona tu negocio en la sección de la <strong>Tienda Online Demo</strong> y pruébalo.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <p>&copy; 2026 Ecosistema Corporativo. Todos los derechos reservados. Desarrollado con Inteligencia Artificial.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
